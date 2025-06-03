@@ -28,5 +28,15 @@
     "timeStart": "11:00",
     "timeEnd": "14:00",
     "id": 1748974747194
+  },
+  {
+    "group": "ИС-302",
+    "subject": "Ағылшын тілі",
+    "teacher": "Искакова Нургул",
+    "room": "201",
+    "dayOfWeek": "thursday",
+    "timeStart": "14:00",
+    "timeEnd": "15:00",
+    "id": 1748984512680
   }
 ]

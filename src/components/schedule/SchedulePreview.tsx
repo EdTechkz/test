@@ -76,9 +76,17 @@ export function SchedulePreview({ filterType, filterValue, allowDelete }: Schedu
     }
   }
   schedule.forEach(lesson => {
-    if (grid[lesson.dayOfWeek] && grid[lesson.dayOfWeek][lesson.timeStart]) {
-      if (!filterType || !filterValue || lesson[filterType] === filterValue) {
-        grid[lesson.dayOfWeek][lesson.timeStart].push(lesson);
+    if (!filterType || !filterValue || lesson[filterType] === filterValue) {
+      // Найти индексы начала и конца
+      const startIdx = times.indexOf(lesson.timeStart);
+      const endIdx = times.indexOf(lesson.timeEnd);
+      if (grid[lesson.dayOfWeek]) {
+        for (let i = startIdx; i < endIdx; i++) {
+          const t = times[i];
+          if (grid[lesson.dayOfWeek][t]) {
+            grid[lesson.dayOfWeek][t].push(lesson);
+          }
+        }
       }
     }
   });
@@ -129,32 +137,28 @@ export function SchedulePreview({ filterType, filterValue, allowDelete }: Schedu
           justify-content: center;
         }
         .schedule-class {
-          padding: 8px;
-          border-radius: 6px;
+          padding: 10px 10px 10px 14px;
+          border-radius: 8px;
           width: 100%;
-          font-size: 12px;
-          line-height: 1.3;
+          font-size: 11.5px;
+          line-height: 1.35;
+          box-shadow: 0 2px 8px 0 #e0e7ef33;
+          border-left: 6px solid #3b82f6;
+          background: #f8fafc;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 2px;
         }
-        .schedule-class.math {
-          background: #dbeafe;
-          border-left: 4px solid #3b82f6;
-        }
-        .schedule-class.literature {
-          background: #dcfce7;
-          border-left: 4px solid #22c55e;
-        }
-        .schedule-class.history {
-          background: #fed7d7;
-          border-left: 4px solid #ef4444;
-        }
-        .schedule-class.science {
-          background: #fef3c7;
-          border-left: 4px solid #f59e0b;
-        }
-        .schedule-class.art {
-          background: #f3e8ff;
-          border-left: 4px solid #8b5cf6;
-        }
+        .schedule-class.math { border-left-color: #3b82f6; background: #dbeafe; }
+        .schedule-class.literature { border-left-color: #22c55e; background: #dcfce7; }
+        .schedule-class.history { border-left-color: #ef4444; background: #fed7d7; }
+        .schedule-class.science { border-left-color: #f59e0b; background: #fef3c7; }
+        .schedule-class.art { border-left-color: #8b5cf6; background: #f3e8ff; }
+        .schedule-class b { font-size: 13px; font-weight: 700; color: #1e293b; }
+        .schedule-class .group-room { color: #334155; font-size: 11.5px; font-weight: 500; margin-top: 2px; }
+        .schedule-class .teacher { color: #64748b; font-size: 10.5px; font-style: italic; margin-top: 2px; }
       `}</style>
       <div className="schedule-cell"></div>
       {days.map((day) => (
@@ -167,21 +171,38 @@ export function SchedulePreview({ filterType, filterValue, allowDelete }: Schedu
             const lessons = grid[day.value][time];
             return (
               <div key={`${day.value}-${time}`} className="schedule-cell">
-                {lessons.map(lesson => (
-                  <div key={lesson.id} className={`schedule-class ${lesson.type || ''} flex items-center justify-between gap-2`}>
-                    <span>{lesson.subject}</span>
-                    {allowDelete && (
-                      <button
-                        title="Өшіру"
-                        onClick={() => handleDelete(lesson.id)}
-                        className="ml-2 text-red-500 hover:text-red-700"
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    )}
-                  </div>
-                ))}
+                {lessons.map(lesson => {
+                  // Преобразуем ФИО преподавателя в формат: Фамилия И.О.
+                  let teacherShort = lesson.teacher;
+                  if (lesson.teacher) {
+                    const parts = lesson.teacher.split(" ");
+                    if (parts.length >= 2) {
+                      const last = parts[0];
+                      const first = parts[1][0] + ".";
+                      const middle = parts[2] ? parts[2][0] + "." : "";
+                      teacherShort = `${last} ${first}${middle}`;
+                    }
+                  }
+                  return (
+                    <div key={lesson.id} className={`schedule-class ${lesson.type || ''}`}>
+                      <div style={{ flex: 1 }}>
+                        <div><b>{lesson.subject}</b></div>
+                        <div className="group-room">{lesson.group} | {lesson.room}</div>
+                        <div className="teacher">{teacherShort}</div>
+                      </div>
+                      {allowDelete && (
+                        <button
+                          title="Өшіру"
+                          onClick={() => handleDelete(lesson.id)}
+                          className="ml-2 text-red-500 hover:text-red-700"
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             );
           })}

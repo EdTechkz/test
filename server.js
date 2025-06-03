@@ -305,7 +305,7 @@ app.post("/api/schedule-bot/message", (req, res) => {
     if (match && match[1]) {
       fs.writeFileSync(NOTICE_FILE, JSON.stringify({ notice: match[1] }, null, 2), "utf-8");
       broadcastUpdate("notice");
-      return res.json({ reply: "Хабарлама жаңартылды!" });
+      return res.json({ reply: `Хабарлама жаңартылды!\n\n📢 ${match[1]}` });
     } else {
       return res.json({ reply: "Қате! Формат: Хабарлама \"Мәтін\"" });
     }
