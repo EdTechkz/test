@@ -12,5 +12,12 @@
     "number_of_students": 25,
     "curator": "австрийки",
     "id": 1748951072270
+  },
+  {
+    "name": "яма",
+    "specialization": "класс",
+    "number_of_students": 25,
+    "curator": "яма",
+    "id": 1748957044593
   }
 ]
