@@ -28,15 +28,5 @@
     "timeStart": "11:00",
     "timeEnd": "14:00",
     "id": 1748974747194
-  },
-  {
-    "group": "мав",
-    "subject": "пмав",
-    "teacher": "австрийки",
-    "room": "jnhbgvf",
-    "dayOfWeek": "friday",
-    "timeStart": "15:00",
-    "timeEnd": "16:00",
-    "id": 1748975401246
   }
 ]

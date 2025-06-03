@@ -6,7 +6,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SchedulePreview } from "@/components/schedule/SchedulePreview";
-import { Calendar, Clock, Users, GraduationCap, Download, Filter, Printer } from "lucide-react";
+import { Calendar, Clock, Users, GraduationCap, Download, Filter, Printer, Info } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import { getDashboardStats, getSchedulePreview, getUpcomingLessons, getNotifications } from "@/services/dashboardService";
@@ -19,6 +19,38 @@ import {
 } from "@/components/ui/select";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
+
+function StudentNotice() {
+  const [notice, setNotice] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchNotice = () => {
+      fetch("/api/notice")
+        .then(r => r.ok ? r.json() : { notice: null })
+        .then(data => setNotice(data.notice || null))
+        .catch(() => setNotice(null));
+    };
+    fetchNotice();
+    let ws: WebSocket | null = null;
+    try {
+      ws = new window.WebSocket(`ws://${window.location.host}`);
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === "update" && msg.entity === "notice") {
+            fetchNotice();
+          }
+        } catch {}
+      };
+    } catch {}
+    return () => { if (ws) ws.close(); };
+  }, []);
+  return (
+    <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-2 flex items-center gap-2">
+      <Info size={18} className="text-blue-500" />
+      <span>{notice || "📢 Сабақтарда өзгерістер болуы мүмкін. Өз тобыңыздың кестесін үнемі тексеріп отырыңыз!"}</span>
+    </div>
+  );
+}
 
 export function DashboardView() {
   const [stats, setStats] = useState([]);
@@ -68,6 +100,7 @@ export function DashboardView() {
 
   // Категории фильтра
   const FILTER_CATEGORIES = [
+    { value: "all", label: "Барлығы" },
     { value: "group", label: "Топтар" },
     { value: "teacher", label: "Оқытушылар" },
     { value: "room", label: "Аудиториялар" },
@@ -105,7 +138,7 @@ export function DashboardView() {
 
   function exportScheduleToCSV(schedule, filterType, filterValue) {
     const filtered = schedule.filter(lesson => {
-      if (!filterType || !filterValue) return true;
+      if (!filterType || filterType === "all" || !filterValue) return true;
       return lesson[filterType] === filterValue;
     });
     const header = ["Топ","Пән","Оқытушы","Аудитория","Күн","Басталуы","Аяқталуы"];
@@ -117,7 +150,7 @@ export function DashboardView() {
 
   function exportScheduleToExcel(schedule, filterType, filterValue) {
     const filtered = schedule.filter(lesson => {
-      if (!filterType || !filterValue) return true;
+      if (!filterType || filterType === "all" || !filterValue) return true;
       return lesson[filterType] === filterValue;
     });
     const header = ["Топ","Пән","Оқытушы","Аудитория","Күн","Басталуы","Аяқталуы"];
@@ -136,7 +169,7 @@ export function DashboardView() {
           <p className="text-muted-foreground mb-4">Колледжтің кестесін басқару жүйесіне қош келдіңіз!</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto items-center">
-          <Select value={filterType} onValueChange={setFilterType}>
+          <Select value={filterType} onValueChange={v => { setFilterType(v); setFilterValue(""); }}>
             <SelectTrigger>
               <SelectValue placeholder="Кесте түрі" />
             </SelectTrigger>
@@ -146,21 +179,23 @@ export function DashboardView() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={filterValue} onValueChange={setFilterValue}>
-            <SelectTrigger>
-              <SelectValue placeholder={
-                filterType === "group" ? "Топты таңдау" :
-                filterType === "teacher" ? "Оқытушыны таңдау" :
-                filterType === "room" ? "Аудиторияны таңдау" :
-                filterType === "subject" ? "Пәнді таңдау" : "Таңдау"
-              } />
-            </SelectTrigger>
-            <SelectContent>
-              {filterOptions.map((option) => (
-                <SelectItem key={option} value={option}>{option}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {filterType !== "all" && (
+            <Select value={filterValue} onValueChange={setFilterValue}>
+              <SelectTrigger>
+                <SelectValue placeholder={
+                  filterType === "group" ? "Топты таңдау" :
+                  filterType === "teacher" ? "Оқытушыны таңдау" :
+                  filterType === "room" ? "Аудиторияны таңдау" :
+                  filterType === "subject" ? "Пәнді таңдау" : "Таңдау"
+                } />
+              </SelectTrigger>
+              <SelectContent>
+                {filterOptions.map((option) => (
+                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <Button variant="outline" className="flex-1 sm:flex-initial" onClick={() => window.print()}>
             <Printer size={16} className="mr-2" />
             Басып шығару
@@ -179,7 +214,7 @@ export function DashboardView() {
           </div>
         </div>
       </div>
-
+      <StudentNotice />
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -192,7 +227,7 @@ export function DashboardView() {
         </CardHeader>
         <CardContent>
           <div className="border rounded-md overflow-hidden">
-            <SchedulePreview filterType={filterType} filterValue={filterValue} />
+            <SchedulePreview filterType={filterType === "all" ? undefined : filterType} filterValue={filterValue} />
           </div>
         </CardContent>
       </Card>
