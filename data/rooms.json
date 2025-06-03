@@ -1,16 +1,9 @@
 [
   {
-    "number": "jnhbgvf",
-    "type": "rfcedxwsrv",
+    "number": "201",
+    "type": "Дәрісхана",
     "capacity": 30,
-    "equipment": "braced",
-    "id": 1748940906755
-  },
-  {
-    "number": "fmcs",
-    "type": "vdcd",
-    "capacity": 30,
-    "equipment": "fd",
-    "id": 1748940914585
+    "equipment": "Проектор",
+    "id": 1748976162752
   }
 ]

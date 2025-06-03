@@ -31,10 +31,30 @@ interface ScheduleCreatorProps {
   onClose: () => void;
 }
 
+type ScheduleFormValues = {
+  group: string;
+  subject: string;
+  teacher: string;
+  room: string;
+  dayOfWeek: string;
+  timeStart: string;
+  timeEnd: string;
+};
+
 export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
   const [open, setOpen] = useState(true);
   const { toast } = useToast();
-  const form = useForm();
+  const form = useForm<ScheduleFormValues>({
+    defaultValues: {
+      group: "",
+      subject: "",
+      teacher: "",
+      room: "",
+      dayOfWeek: "",
+      timeStart: "",
+      timeEnd: "",
+    },
+  });
 
   // Временные интервалы с 8:00 до 18:00
   const timeSlots = [
@@ -198,7 +218,7 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
                     </FormControl>
                     <SelectContent>
                       {groups.filter(g => g && g !== "").map((g) => (
-                        <SelectItem key={g} value={g}>{g}</SelectItem>
+                        <SelectItem key={g.id} value={g.name}>{g.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -221,7 +241,7 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
                     </FormControl>
                     <SelectContent>
                       {subjects.filter(s => s && s !== "").map((s) => (
-                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                        <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -244,7 +264,7 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
                     </FormControl>
                     <SelectContent>
                       {teachers.filter(t => t && t !== "").map((t) => (
-                        <SelectItem key={t} value={t}>{t}</SelectItem>
+                        <SelectItem key={t.id} value={t.fullName}>{t.fullName}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -267,7 +287,7 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
                     </FormControl>
                     <SelectContent>
                       {rooms.filter(r => r && r !== "").map((r) => (
-                        <SelectItem key={r} value={r}>{r}</SelectItem>
+                        <SelectItem key={r.id} value={r.number}>{r.number}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -305,20 +325,17 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
               <FormField
                 control={form.control}
                 name="timeStart"
+                rules={{ required: 'Басталуы міндетті' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Время начала</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="08:00" />
-                        </SelectTrigger>
-                      </FormControl>
+                    <FormLabel>Басталуы</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Басталу уақытын таңдаңыз" />
+                      </SelectTrigger>
                       <SelectContent>
-                        {timeSlots.map((time) => (
-                          <SelectItem key={time} value={time}>
-                            {time}
-                          </SelectItem>
+                        {timeSlots.map((slot) => (
+                          <SelectItem key={slot} value={slot}>{slot}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -330,20 +347,17 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
               <FormField
                 control={form.control}
                 name="timeEnd"
+                rules={{ required: 'Аяқталуы міндетті' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Время окончания</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="09:00" />
-                        </SelectTrigger>
-                      </FormControl>
+                    <FormLabel>Аяқталуы</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Аяқталу уақытын таңдаңыз" />
+                      </SelectTrigger>
                       <SelectContent>
-                        {timeSlots.map((time) => (
-                          <SelectItem key={time} value={time}>
-                            {time}
-                          </SelectItem>
+                        {timeSlots.map((slot) => (
+                          <SelectItem key={slot} value={slot}>{slot}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

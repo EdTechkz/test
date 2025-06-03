@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { Trash2 } from "lucide-react";
 
 interface ScheduleLesson {
   id: number;
@@ -15,6 +16,7 @@ interface ScheduleLesson {
 interface SchedulePreviewProps {
   filterType?: "group" | "teacher" | "room";
   filterValue?: string;
+  allowDelete?: boolean;
 }
 
 const days = [
@@ -29,7 +31,7 @@ const times = [
   "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"
 ];
 
-export function SchedulePreview({ filterType, filterValue }: SchedulePreviewProps) {
+export function SchedulePreview({ filterType, filterValue, allowDelete }: SchedulePreviewProps) {
   const [schedule, setSchedule] = useState<ScheduleLesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -80,6 +82,17 @@ export function SchedulePreview({ filterType, filterValue }: SchedulePreviewProp
       }
     }
   });
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm("Бұл сабақты өшіргіңіз келе ме?")) return;
+    try {
+      const res = await fetch(`/api/schedule/${id}`, { method: "DELETE" });
+      if (res.ok) fetchSchedule();
+      else alert("Өшіру кезінде қате болды");
+    } catch {
+      alert("Өшіру кезінде қате болды");
+    }
+  };
 
   return (
     <div className="schedule-grid overflow-x-auto">
@@ -155,8 +168,18 @@ export function SchedulePreview({ filterType, filterValue }: SchedulePreviewProp
             return (
               <div key={`${day.value}-${time}`} className="schedule-cell">
                 {lessons.map(lesson => (
-                  <div key={lesson.id} className={`schedule-class ${lesson.type || ''}`}>
-                    {lesson.subject}
+                  <div key={lesson.id} className={`schedule-class ${lesson.type || ''} flex items-center justify-between gap-2`}>
+                    <span>{lesson.subject}</span>
+                    {allowDelete && (
+                      <button
+                        title="Өшіру"
+                        onClick={() => handleDelete(lesson.id)}
+                        className="ml-2 text-red-500 hover:text-red-700"
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>

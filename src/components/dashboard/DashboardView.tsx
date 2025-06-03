@@ -196,30 +196,6 @@ export function DashboardView() {
           </div>
         </CardContent>
       </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Жақын арадағы сабақтар</CardTitle>
-          <CardDescription>Келесі сабақтар тізімі</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="border rounded-md overflow-hidden">
-            <SchedulePreview filterType={filterType} filterValue={filterValue} />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Хабарламалар</CardTitle>
-          <CardDescription>Соңғы жаңалықтар мен өзгерістер</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="border rounded-md overflow-hidden">
-            <SchedulePreview filterType={filterType} filterValue={filterValue} />
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

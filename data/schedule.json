@@ -1,1 +1,42 @@
-[]
+[
+  {
+    "group": "яма",
+    "subject": "апмв",
+    "teacher": "австрийки",
+    "room": "fmcs",
+    "dayOfWeek": "tuesday",
+    "timeStart": "",
+    "timeEnd": "",
+    "id": 1748973871430
+  },
+  {
+    "group": "мав",
+    "subject": "апмв",
+    "teacher": "австрийки",
+    "room": "fmcs",
+    "dayOfWeek": "monday",
+    "timeStart": "",
+    "timeEnd": "",
+    "id": 1748974082832
+  },
+  {
+    "group": "авч",
+    "subject": "апмв",
+    "teacher": "австрийки",
+    "room": "fmcs",
+    "dayOfWeek": "friday",
+    "timeStart": "11:00",
+    "timeEnd": "14:00",
+    "id": 1748974747194
+  },
+  {
+    "group": "мав",
+    "subject": "пмав",
+    "teacher": "австрийки",
+    "room": "jnhbgvf",
+    "dayOfWeek": "friday",
+    "timeStart": "15:00",
+    "timeEnd": "16:00",
+    "id": 1748975401246
+  }
+]

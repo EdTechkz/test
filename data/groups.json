@@ -1,23 +1,9 @@
 [
   {
-    "name": "авч",
-    "specialization": "всчы",
-    "number_of_students": 5,
-    "curator": "вы",
-    "id": 1748941909253
-  },
-  {
-    "name": "мав",
-    "specialization": "ма",
+    "name": "ИС-302",
+    "specialization": "Ақпараттық технологиятар",
     "number_of_students": 25,
-    "curator": "австрийки",
-    "id": 1748951072270
-  },
-  {
-    "name": "яма",
-    "specialization": "класс",
-    "number_of_students": 25,
-    "curator": "яма",
-    "id": 1748957044593
+    "curator": "Ахманов Байрам",
+    "id": 1748976269374
   }
 ]

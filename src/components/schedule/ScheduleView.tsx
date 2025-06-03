@@ -36,15 +36,10 @@ const FILTER_CATEGORIES = [
 ];
 
 // exportScheduleToCSV — экспортирует расписание в CSV-файл
-function exportScheduleToCSV(schedule, filterType, filterValue) {
-  // Фильтруем расписание по выбранному фильтру
-  const filtered = schedule.filter(lesson => {
-    if (!filterType || !filterValue) return true;
-    return lesson[filterType] === filterValue;
-  });
+function exportScheduleToCSV(schedule) {
   // Формируем заголовки и строки для CSV
   const header = ["Топ","Пән","Оқытушы","Аудитория","Күн","Басталуы","Аяқталуы"];
-  const rows = filtered.map(l => [l.group, l.subject, l.teacher, l.room, l.dayOfWeek, l.timeStart, l.timeEnd]);
+  const rows = schedule.map(l => [l.group, l.subject, l.teacher, l.room, l.dayOfWeek, l.timeStart, l.timeEnd]);
   // Собираем CSV-строку
   const csv = [header, ...rows].map(r => r.join(",")).join("\n");
   // Создаём Blob и сохраняем файл
@@ -53,17 +48,12 @@ function exportScheduleToCSV(schedule, filterType, filterValue) {
 }
 
 // exportScheduleToExcel — экспортирует расписание в Excel (xlsx)
-function exportScheduleToExcel(schedule, filterType, filterValue) {
-  // Фильтруем расписание по выбранному фильтру
-  const filtered = schedule.filter(lesson => {
-    if (!filterType || !filterValue) return true;
-    return lesson[filterType] === filterValue;
-  });
-  // Формируем заголовки и строки для Excel
-  const header = ["Топ","Пән","Оқытушы","Аудитория","Күн","Басталуы","Аяқталуы"];
-  const rows = filtered.map(l => [l.group, l.subject, l.teacher, l.room, l.dayOfWeek, l.timeStart, l.timeEnd]);
+function exportScheduleToExcel(schedule) {
   // Создаём лист и книгу Excel
-  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+  const ws = XLSX.utils.aoa_to_sheet([
+    ["Топ","Пән","Оқытушы","Аудитория","Күн","Басталуы","Аяқталуы"],
+    ...schedule.map(l => [l.group, l.subject, l.teacher, l.room, l.dayOfWeek, l.timeStart, l.timeEnd])
+  ]);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Кесте");
   // Сохраняем файл
@@ -72,10 +62,6 @@ function exportScheduleToExcel(schedule, filterType, filterValue) {
 
 // ScheduleView — основной компонент для просмотра и фильтрации расписания
 export function ScheduleView() {
-  // filterType — выбранная категория фильтра (group, teacher, room, subject)
-  const [filterType, setFilterType] = useState("group");
-  // filterValue — выбранное значение фильтра (например, конкретная группа)
-  const [filterValue, setFilterValue] = useState("");
   // showScheduleCreator — флаг для отображения модального окна создания расписания
   const [showScheduleCreator, setShowScheduleCreator] = useState(false);
   // Списки всех сущностей для фильтрации
@@ -130,13 +116,6 @@ export function ScheduleView() {
       .then(data => setScheduleData(Array.isArray(data) ? data : []));
   }, []);
 
-  // Формирование опций для второго фильтра (например, список групп или преподавателей)
-  let filterOptions = [];
-  if (filterType === "group") filterOptions = groups.map(g => g.name);
-  if (filterType === "teacher") filterOptions = teachers.map(t => t.fullName);
-  if (filterType === "room") filterOptions = rooms.map(r => r.number);
-  if (filterType === "subject") filterOptions = subjects.map(s => s.name);
-
   // Основной return — разметка страницы расписания
   return (
     <div className="space-y-4">
@@ -162,8 +141,8 @@ export function ScheduleView() {
             </Button>
             {exportMenuOpen && (
               <div className="absolute right-0 mt-2 z-10 bg-white border rounded shadow-lg min-w-[160px]">
-                <button className="w-full text-left px-4 py-2 hover:bg-muted" onClick={() => { exportScheduleToCSV(scheduleData, filterType, filterValue); setExportMenuOpen(false); }}>Экспорт в CSV</button>
-                <button className="w-full text-left px-4 py-2 hover:bg-muted" onClick={() => { exportScheduleToExcel(scheduleData, filterType, filterValue); setExportMenuOpen(false); }}>Экспорт в Excel</button>
+                <button className="w-full text-left px-4 py-2 hover:bg-muted" onClick={() => { exportScheduleToCSV(scheduleData); setExportMenuOpen(false); }}>Экспорт в CSV</button>
+                <button className="w-full text-left px-4 py-2 hover:bg-muted" onClick={() => { exportScheduleToExcel(scheduleData); setExportMenuOpen(false); }}>Экспорт в Excel</button>
               </div>
             )}
           </div>
@@ -184,52 +163,8 @@ export function ScheduleView() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-6 items-start">
-            {/* Фильтры по категориям и значениям */}
-            <div className="flex flex-row gap-4 w-full md:w-auto items-center bg-muted/40 border rounded-lg p-3 shadow-sm">
-              <Select value={filterType} onValueChange={v => { setFilterType(v); setFilterValue(""); }}>
-                <SelectTrigger className="w-44 font-medium focus:ring-2 focus:ring-primary/50">
-                  <SelectValue placeholder="Категория" />
-                  <ChevronDown className="ml-auto h-4 w-4 opacity-60" />
-                </SelectTrigger>
-                <SelectContent>
-                  {FILTER_CATEGORIES.map(cat => (
-                    <SelectItem key={cat.value} value={cat.value} className="flex items-center">
-                      {cat.icon}{cat.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={filterValue} onValueChange={setFilterValue}>
-                <SelectTrigger className="w-56 font-medium focus:ring-2 focus:ring-primary/50">
-                  <SelectValue placeholder={
-                    filterType === "group" ? "Топты таңдау" :
-                    filterType === "teacher" ? "Оқытушыны таңдау" :
-                    filterType === "room" ? "Аудиторияны таңдау" :
-                    filterType === "subject" ? "Пәнді таңдау" : "Таңдау"
-                  } />
-                  <ChevronDown className="ml-auto h-4 w-4 opacity-60" />
-                </SelectTrigger>
-                <SelectContent>
-                  {filterOptions
-                    .filter((item) => item && item !== "")
-                    .map((item) => (
-                      <SelectItem key={item} value={item} className="truncate">
-                        {item}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-              {/* Кнопка фильтра (визуальная) */}
-              <Button variant="outline" size="icon" className="rounded-full border-primary/30 hover:bg-primary/10">
-                <Filter size={18} />
-              </Button>
-            </div>
-          </div>
-
-          {/* Превью расписания с учётом фильтров */}
           <div className="mt-4 border rounded-md overflow-hidden">
-            <SchedulePreview filterType={filterType as any} filterValue={filterValue} />
+            <SchedulePreview allowDelete />
           </div>
         </CardContent>
       </Card>
