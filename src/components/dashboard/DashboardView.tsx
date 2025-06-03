@@ -12,6 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
 
 export function DashboardView() {
   const [stats, setStats] = useState([]);
@@ -20,19 +22,61 @@ export function DashboardView() {
   const [notifications, setNotifications] = useState([]);
   const [filterType, setFilterType] = useState("group");
   const [filterValue, setFilterValue] = useState("");
+  const [groups, setGroups] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [scheduleData, setScheduleData] = useState([]);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
 
-  // Пример данных для фильтра
-  const groups = ["ИС-11", "ИС-12", "ПС-11", "ПС-12"];
-  const teachers = ["Иванова Н.П.", "Петрова М.А.", "Сидоров К.В.", "Николаев П.С."];
-  const rooms = ["302", "404", "201", "405", "311", "408"];
+  // Загрузка актуальных данных для фильтров
+  useEffect(() => {
+    const fetchAll = () => {
+      Promise.all([
+        fetch("/api/groups/").then(r => r.ok ? r.json() : []),
+        fetch("/api/teachers/").then(r => r.ok ? r.json() : []),
+        fetch("/api/rooms/").then(r => r.ok ? r.json() : []),
+        fetch("/api/subjects/").then(r => r.ok ? r.json() : []),
+      ]).then(([groups, teachers, rooms, subjects]) => {
+        setGroups(groups);
+        setTeachers(teachers);
+        setRooms(rooms);
+        setSubjects(subjects);
+      });
+    };
+    fetchAll();
+    // WebSocket для автообновления
+    let ws = null;
+    try {
+      ws = new window.WebSocket(`ws://${window.location.host}`);
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === "update" && ["groups","teachers","rooms","subjects"].includes(msg.entity)) {
+            fetchAll();
+          }
+        } catch {}
+      };
+    } catch {}
+    return () => { if (ws) ws.close(); };
+  }, []);
+
+  // Категории фильтра
+  const FILTER_CATEGORIES = [
+    { value: "group", label: "Группы" },
+    { value: "teacher", label: "Преподаватели" },
+    { value: "room", label: "Аудитории" },
+    { value: "subject", label: "Предметы" },
+  ];
 
   // Определяем значения для второго фильтра
   const filterOptions = useMemo(() => {
-    if (filterType === "group") return groups;
-    if (filterType === "teacher") return teachers;
-    if (filterType === "room") return rooms;
+    if (filterType === "group") return groups.map(g => g.name);
+    if (filterType === "teacher") return teachers.map(t => t.fullName);
+    if (filterType === "room") return rooms.map(r => r.number);
+    if (filterType === "subject") return subjects.map(s => s.name);
     return [];
-  }, [filterType]);
+  }, [filterType, groups, teachers, rooms, subjects]);
 
   useEffect(() => {
     setStats(getDashboardStats());
@@ -41,12 +85,43 @@ export function DashboardView() {
     setNotifications(getNotifications());
   }, []);
 
+  useEffect(() => {
+    fetch("/api/schedule/")
+      .then(res => res.json())
+      .then(data => setScheduleData(Array.isArray(data) ? data : []));
+  }, []);
+
   const currentDate = new Date().toLocaleDateString('ru-RU', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
+
+  function exportScheduleToCSV(schedule, filterType, filterValue) {
+    const filtered = schedule.filter(lesson => {
+      if (!filterType || !filterValue) return true;
+      return lesson[filterType] === filterValue;
+    });
+    const header = ["Группа","Предмет","Преподаватель","Аудитория","День","Начало","Окончание"];
+    const rows = filtered.map(l => [l.group, l.subject, l.teacher, l.room, l.dayOfWeek, l.timeStart, l.timeEnd]);
+    const csv = [header, ...rows].map(r => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    saveAs(blob, "schedule.csv");
+  }
+
+  function exportScheduleToExcel(schedule, filterType, filterValue) {
+    const filtered = schedule.filter(lesson => {
+      if (!filterType || !filterValue) return true;
+      return lesson[filterType] === filterValue;
+    });
+    const header = ["Группа","Предмет","Преподаватель","Аудитория","День","Начало","Окончание"];
+    const rows = filtered.map(l => [l.group, l.subject, l.teacher, l.room, l.dayOfWeek, l.timeStart, l.timeEnd]);
+    const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Расписание");
+    XLSX.writeFile(wb, "schedule.xlsx");
+  }
 
   return (
     <div className="space-y-6">
@@ -60,9 +135,9 @@ export function DashboardView() {
               <SelectValue placeholder="Вид расписания" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="group">По группам</SelectItem>
-              <SelectItem value="teacher">По преподавателям</SelectItem>
-              <SelectItem value="room">По аудиториям</SelectItem>
+              {FILTER_CATEGORIES.map(cat => (
+                <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Select value={filterValue} onValueChange={setFilterValue}>
@@ -70,7 +145,8 @@ export function DashboardView() {
               <SelectValue placeholder={
                 filterType === "group" ? "Выбрать группу" :
                 filterType === "teacher" ? "Выбрать преподавателя" :
-                filterType === "room" ? "Выбрать аудиторию" : "Выбрать"
+                filterType === "room" ? "Выбрать аудиторию" :
+                filterType === "subject" ? "Выбрать предмет" : "Выбрать"
               } />
             </SelectTrigger>
             <SelectContent>
@@ -79,14 +155,22 @@ export function DashboardView() {
               ))}
             </SelectContent>
           </Select>
-          <Button variant="outline" className="flex-1 sm:flex-initial">
+          <Button variant="outline" className="flex-1 sm:flex-initial" onClick={() => window.print()}>
             <Printer size={16} className="mr-2" />
             Печать
           </Button>
-          <Button className="flex-1 sm:flex-initial">
-            <Download size={16} className="mr-2" />
-            Экспорт
-          </Button>
+          <div className="relative">
+            <Button className="flex-1 sm:flex-initial" onClick={() => setExportMenuOpen(v => !v)}>
+              <Download size={16} className="mr-2" />
+              Экспорт
+            </Button>
+            {exportMenuOpen && (
+              <div className="absolute right-0 mt-2 z-10 bg-white border rounded shadow-lg min-w-[160px]">
+                <button className="w-full text-left px-4 py-2 hover:bg-muted" onClick={() => { exportScheduleToCSV(scheduleData, filterType, filterValue); setExportMenuOpen(false); }}>Экспорт в CSV</button>
+                <button className="w-full text-left px-4 py-2 hover:bg-muted" onClick={() => { exportScheduleToExcel(scheduleData, filterType, filterValue); setExportMenuOpen(false); }}>Экспорт в Excel</button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

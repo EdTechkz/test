@@ -16,13 +16,19 @@ import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog";
 
 // Вспомогательные функции для преобразования
 function toCamel(obj) {
-  if (!obj) return obj;
+  if (!obj) return {
+    id: '',
+    fullName: '',
+    specialization: '',
+    experience: '',
+    contactInfo: '',
+  };
   return {
-    id: obj.id,
-    fullName: obj.full_name,
-    specialization: obj.specialization,
-    experience: obj.experience,
-    contactInfo: obj.contact_info,
+    id: obj.id ?? '',
+    fullName: obj.full_name ?? obj.fullName ?? '',
+    specialization: obj.specialization ?? '',
+    experience: obj.experience ?? '',
+    contactInfo: obj.contact_info ?? obj.contactInfo ?? '',
   };
 }
 function toSnake(obj) {
@@ -44,12 +50,23 @@ export function TeachersView() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentTeacher, setCurrentTeacher] = useState(null);
 
-  // Загрузка преподавателей с backend
+  // Загрузка преподавателей с backend + WebSocket подписка
   useEffect(() => {
-    fetch("/api/teachers/")
-      .then((res) => res.json())
-      .then((data) => setTeachers(data.map(toCamel)))
-      .catch(() => toast.error("Ошибка загрузки преподавателей"));
+    const fetchTeachers = () => {
+      fetch("/api/teachers/")
+        .then((res) => res.json())
+        .then((data) => setTeachers(data.map(toCamel)))
+        .catch(() => toast.error("Ошибка загрузки преподавателей"));
+    };
+    fetchTeachers();
+    const ws = new window.WebSocket(`ws://${window.location.host}`);
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.type === "update" && msg.entity === "teachers") {
+        fetchTeachers();
+      }
+    };
+    return () => ws.close();
   }, []);
 
   const columns = [
@@ -62,10 +79,10 @@ export function TeachersView() {
   const filteredTeachers = teachers.filter((teacher) => {
     const query = searchQuery.toLowerCase();
     return (
-      teacher.fullName.toLowerCase().includes(query) ||
-      teacher.specialization.toLowerCase().includes(query) ||
-      teacher.experience.toLowerCase().includes(query) ||
-      teacher.contactInfo.toLowerCase().includes(query)
+      (teacher.fullName || '').toLowerCase().includes(query) ||
+      (teacher.specialization || '').toLowerCase().includes(query) ||
+      (teacher.experience || '').toLowerCase().includes(query) ||
+      (teacher.contactInfo || '').toLowerCase().includes(query)
     );
   });
 

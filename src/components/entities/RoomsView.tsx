@@ -53,12 +53,23 @@ export function RoomsView() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
 
-  // Загрузка аудиторий с backend
+  // Загрузка аудиторий с backend + WebSocket подписка
   useEffect(() => {
-    fetch("/api/rooms/")
-      .then((res) => res.json())
-      .then((data) => setRooms(data.map(toCamel)))
-      .catch(() => toast.error("Ошибка загрузки аудиторий"));
+    const fetchRooms = () => {
+      fetch("/api/rooms/")
+        .then((res) => res.json())
+        .then((data) => setRooms(data.map(toCamel)))
+        .catch(() => toast.error("Ошибка загрузки аудиторий"));
+    };
+    fetchRooms();
+    const ws = new window.WebSocket(`ws://${window.location.host}`);
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.type === "update" && msg.entity === "rooms") {
+        fetchRooms();
+      }
+    };
+    return () => ws.close();
   }, []);
 
   useEffect(() => {

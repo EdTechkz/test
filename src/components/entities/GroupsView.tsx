@@ -21,7 +21,7 @@ function toCamel(obj) {
     id: obj.id,
     name: obj.name,
     specialization: obj.specialization,
-    numberOfStudents: obj.number_of_students,
+    numberOfStudents: obj.number_of_students ?? 0,
     curator: obj.curator,
   };
 }
@@ -44,12 +44,23 @@ export function GroupsView() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentGroup, setCurrentGroup] = useState(null);
 
-  // Загрузка групп с backend
+  // Загрузка групп с backend + WebSocket подписка
   useEffect(() => {
-    fetch("/api/groups/")
-      .then((res) => res.json())
-      .then((data) => setGroups(data.map(toCamel)))
-      .catch(() => toast.error("Ошибка загрузки групп"));
+    const fetchGroups = () => {
+      fetch("/api/groups/")
+        .then((res) => res.json())
+        .then((data) => setGroups(data.map(toCamel)))
+        .catch(() => toast.error("Ошибка загрузки групп"));
+    };
+    fetchGroups();
+    const ws = new window.WebSocket(`ws://${window.location.host}`);
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.type === "update" && msg.entity === "groups") {
+        fetchGroups();
+      }
+    };
+    return () => ws.close();
   }, []);
 
   const columns = [

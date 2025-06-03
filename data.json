@@ -1,0 +1,38 @@
+{
+  "teachers": [
+    {
+      "full_name": "мак",
+      "specialization": "крав",
+      "experience": "мак",
+      "contact_info": "Ами",
+      "id": 1748938454340
+    }
+  ],
+  "groups": [
+    {
+      "name": "па",
+      "specialization": "па",
+      "number_of_students": 25,
+      "curator": "па",
+      "id": 1748938774488
+    }
+  ],
+  "rooms": [
+    {
+      "number": "епкм",
+      "type": "пас",
+      "capacity": 30,
+      "equipment": "па",
+      "id": 1748938755808
+    }
+  ],
+  "subjects": [
+    {
+      "name": "всыфпмав",
+      "hours_per_week": 4,
+      "type": "пиа",
+      "department": "па",
+      "id": 1748938765141
+    }
+  ]
+}

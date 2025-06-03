@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -51,10 +51,51 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
     { value: "saturday", label: "Суббота" }
   ];
 
-  const mockGroups = ["ИС-11", "ИС-12", "ПС-11", "ПС-12"];
-  const mockTeachers = ["Иванова Н.П.", "Петрова М.А.", "Сидоров К.В.", "Николаев П.С."];
-  const mockRooms = ["302", "404", "201", "405", "311", "408"];
-  const mockSubjects = ["Математика", "Литература", "История", "Физика", "Информатика", "Химия"];
+  // --- NEW: State for actual data ---
+  const [groups, setGroups] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setLoading(true);
+    let ws: WebSocket | null = null;
+    const fetchAll = () => {
+      Promise.all([
+        fetch("/api/groups/").then(r => r.ok ? r.json() : []),
+        fetch("/api/teachers/").then(r => r.ok ? r.json() : []),
+        fetch("/api/rooms/").then(r => r.ok ? r.json() : []),
+        fetch("/api/subjects/").then(r => r.ok ? r.json() : []),
+      ]).then(([groups, teachers, rooms, subjects]) => {
+        setGroups(groups);
+        setTeachers(teachers);
+        setRooms(rooms);
+        setSubjects(subjects);
+        setLoading(false);
+      }).catch((e) => {
+        setError("Ошибка загрузки данных для расписания");
+        setLoading(false);
+      });
+    };
+    fetchAll();
+    // --- WebSocket подписка ---
+    try {
+      ws = new window.WebSocket(`ws://${window.location.host}`);
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === "update") {
+            if (["groups", "teachers", "rooms", "subjects"].includes(msg.entity)) {
+              fetchAll();
+            }
+          }
+        } catch {}
+      };
+    } catch {}
+    return () => { if (ws) ws.close(); };
+  }, []);
 
   const mockSchedule = [
     // Пример уже существующих занятий для проверки занятости аудитории
@@ -69,7 +110,7 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
 
   const parseTime = (t: string) => parseInt(t.replace(":", ""), 10);
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     // Проверка времени
     if (parseTime(data.timeEnd) <= parseTime(data.timeStart)) {
       toast({
@@ -98,13 +139,33 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
       return;
     }
 
-    // Можно добавить другие рекомендации и ограничения здесь
-
-    toast({
-      title: "Расписание создано",
-      description: `Занятие по предмету "${data.subject}" успешно добавлено в расписание`,
-    });
-    handleClose();
+    // --- Новый код: отправка на сервер ---
+    try {
+      const res = await fetch("/api/schedule/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        toast({
+          title: "Ошибка",
+          description: "Не удалось создать занятие. Попробуйте ещё раз.",
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({
+        title: "Расписание создано",
+        description: `Занятие по предмету "${data.subject}" успешно добавлено в расписание`,
+      });
+      handleClose();
+    } catch (e) {
+      toast({
+        title: "Ошибка",
+        description: "Ошибка при сохранении занятия: " + (e?.message || e),
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -116,7 +177,11 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
             Заполните форму для создания нового занятия в расписании
           </DialogDescription>
         </DialogHeader>
-        
+        {loading ? (
+          <div className="text-center py-8">Загрузка...</div>
+        ) : error ? (
+          <div className="text-center text-red-500 py-8">{error}</div>
+        ) : (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -132,10 +197,8 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {mockGroups.map((group) => (
-                        <SelectItem key={group} value={group}>
-                          {group}
-                        </SelectItem>
+                      {groups.filter(g => g && g !== "").map((g) => (
+                        <SelectItem key={g} value={g}>{g}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -157,10 +220,8 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {mockSubjects.map((subject) => (
-                        <SelectItem key={subject} value={subject}>
-                          {subject}
-                        </SelectItem>
+                      {subjects.filter(s => s && s !== "").map((s) => (
+                        <SelectItem key={s} value={s}>{s}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -182,10 +243,8 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {mockTeachers.map((teacher) => (
-                        <SelectItem key={teacher} value={teacher}>
-                          {teacher}
-                        </SelectItem>
+                      {teachers.filter(t => t && t !== "").map((t) => (
+                        <SelectItem key={t} value={t}>{t}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -207,10 +266,8 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {mockRooms.map((room) => (
-                        <SelectItem key={room} value={room}>
-                          Аудитория {room}
-                        </SelectItem>
+                      {rooms.filter(r => r && r !== "").map((r) => (
+                        <SelectItem key={r} value={r}>{r}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -306,6 +363,7 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
             </DialogFooter>
           </form>
         </Form>
+        )}
       </DialogContent>
     </Dialog>
   );

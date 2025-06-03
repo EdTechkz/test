@@ -1,61 +1,89 @@
-import React from "react";
+import React, { useEffect, useState, useCallback } from "react";
+
+interface ScheduleLesson {
+  id: number;
+  group: string;
+  subject: string;
+  teacher: string;
+  room: string;
+  dayOfWeek: string; // monday, tuesday, ...
+  timeStart: string; // "08:00"
+  timeEnd: string;   // "09:00"
+  type?: string;     // для цвета (math, science...)
+}
 
 interface SchedulePreviewProps {
   filterType?: "group" | "teacher" | "room";
   filterValue?: string;
 }
 
-export function SchedulePreview({ filterType, filterValue }: SchedulePreviewProps) {
-  const days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
-  const times = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
-  
-  const scheduleData: Record<string, Record<string, Array<{
-    group: string;
-    subject: string;
-    teacher: string;
-    room: string;
-    type: string;
-  }>>> = {
-    "Понедельник": {
-      "08:00": [
-        { group: "ИС-11", subject: "Математика", teacher: "Иванова Н.П.", room: "302", type: "math" },
-        { group: "ПС-11", subject: "История", teacher: "Сидоров К.В.", room: "201", type: "history" }
-      ],
-      "09:00": [
-        { group: "ИС-11", subject: "Литература", teacher: "Петрова М.А.", room: "404", type: "literature" }
-      ],
-      "10:00": [
-        { group: "ИС-11", subject: "История", teacher: "Сидоров К.В.", room: "201", type: "history" }
-      ],
-      "14:00": [
-        { group: "ИС-12", subject: "Физика", teacher: "Николаев П.С.", room: "405", type: "science" }
-      ],
-    },
-    "Вторник": {},
-    "Среда": {},
-    "Четверг": {},
-    "Пятница": {},
-    "Суббота": {
-      "10:00": [
-        { group: "ИС-12", subject: "Проектная деятельность", teacher: "Кузнецов А.И.", room: "311", type: "math" },
-        { group: "ПС-11", subject: "Физика", teacher: "Николаев П.С.", room: "405", type: "science" }
-      ]
-    }
-  };
+const days = [
+  { value: "monday", label: "Понедельник" },
+  { value: "tuesday", label: "Вторник" },
+  { value: "wednesday", label: "Среда" },
+  { value: "thursday", label: "Четверг" },
+  { value: "friday", label: "Пятница" },
+  { value: "saturday", label: "Суббота" },
+];
+const times = [
+  "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"
+];
 
-  // Фильтрация занятий по выбранному фильтру
-  const filterLesson = (lesson: any) => {
-    if (!filterType || !filterValue) return true;
-    if (filterType === "group") return lesson.group === filterValue;
-    if (filterType === "teacher") return lesson.teacher === filterValue;
-    if (filterType === "room") return lesson.room === filterValue;
-    return true;
-  };
+export function SchedulePreview({ filterType, filterValue }: SchedulePreviewProps) {
+  const [schedule, setSchedule] = useState<ScheduleLesson[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchSchedule = useCallback(() => {
+    setLoading(true);
+    fetch("/api/schedule/")
+      .then(res => res.json())
+      .then(data => {
+        setSchedule(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Ошибка загрузки расписания");
+        setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    fetchSchedule();
+    let ws: WebSocket | null = null;
+    try {
+      ws = new window.WebSocket(`ws://${window.location.host}`);
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === "update" && msg.entity === "schedule") {
+            fetchSchedule();
+          }
+        } catch {}
+      };
+    } catch {}
+    return () => { if (ws) ws.close(); };
+  }, [fetchSchedule]);
+
+  // Группируем по дням и времени
+  const grid: Record<string, Record<string, ScheduleLesson[]>> = {};
+  for (const day of days) {
+    grid[day.value] = {};
+    for (const time of times) {
+      grid[day.value][time] = [];
+    }
+  }
+  schedule.forEach(lesson => {
+    if (grid[lesson.dayOfWeek] && grid[lesson.dayOfWeek][lesson.timeStart]) {
+      if (!filterType || !filterValue || lesson[filterType] === filterValue) {
+        grid[lesson.dayOfWeek][lesson.timeStart].push(lesson);
+      }
+    }
+  });
 
   return (
     <div className="schedule-grid overflow-x-auto">
-      <style>
-        {`
+      <style>{`
         .schedule-grid {
           display: grid;
           grid-template-columns: 100px repeat(${days.length}, 1fr);
@@ -114,29 +142,27 @@ export function SchedulePreview({ filterType, filterValue }: SchedulePreviewProp
           background: #f3e8ff;
           border-left: 4px solid #8b5cf6;
         }
-        `}
-      </style>
-      
+      `}</style>
       <div className="schedule-cell"></div>
       {days.map((day) => (
-        <div key={day} className="schedule-header">{day}</div>
+        <div key={day.value} className="schedule-header">{day.label}</div>
       ))}
-      
       {times.map((time) => (
         <React.Fragment key={time}>
           <div className="schedule-time">{time}</div>
           {days.map((day) => {
-            const lessons = (scheduleData[day]?.[time] || []).filter(filterLesson);
+            const lessons = grid[day.value][time];
             return (
-              <div key={`${day}-${time}`} className="schedule-cell">
+              <div key={`${day.value}-${time}`} className="schedule-cell">
                 {Array.isArray(lessons) && lessons.length > 0 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%', justifyContent: 'center' }}>
                     {lessons.map((lesson, idx) => (
-                      <div key={idx} className={`schedule-class ${lesson.type}`} style={{ minWidth: 120, maxWidth: 180 }}>
+                      <div key={lesson.id} className={`schedule-class ${lesson.type || ''}`} style={{ minWidth: 120, maxWidth: 180 }}>
                         <div className="font-medium">{lesson.subject}</div>
                         <div className="text-xs text-gray-600 mt-1">Группа: {lesson.group}</div>
                         <div className="text-xs text-gray-600">Преп: {lesson.teacher}</div>
                         <div className="text-xs text-gray-600">Ауд: {lesson.room}</div>
+                        <div className="text-xs text-gray-400">{lesson.timeStart} - {lesson.timeEnd}</div>
                       </div>
                     ))}
                   </div>
@@ -146,6 +172,8 @@ export function SchedulePreview({ filterType, filterValue }: SchedulePreviewProp
           })}
         </React.Fragment>
       ))}
+      {loading && <div className="absolute left-0 right-0 top-0 bottom-0 flex items-center justify-center bg-white/70 z-10">Загрузка...</div>}
+      {error && <div className="absolute left-0 right-0 top-0 bottom-0 flex items-center justify-center text-red-500 bg-white/80 z-10">{error}</div>}
     </div>
   );
 }

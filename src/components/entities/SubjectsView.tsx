@@ -20,7 +20,7 @@ function toCamel(obj) {
   return {
     id: obj.id,
     name: obj.name,
-    hoursPerWeek: obj.hours_per_week,
+    hoursPerWeek: obj.hours_per_week ?? 0,
     type: obj.type,
     department: obj.department,
   };
@@ -44,12 +44,23 @@ export function SubjectsView() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentSubject, setCurrentSubject] = useState(null);
 
-  // Загрузка предметов с backend
+  // Загрузка предметов с backend + WebSocket подписка
   useEffect(() => {
-    fetch("/api/subjects/")
-      .then((res) => res.json())
-      .then((data) => setSubjects(data.map(toCamel)))
-      .catch(() => toast.error("Ошибка загрузки предметов"));
+    const fetchSubjects = () => {
+      fetch("/api/subjects/")
+        .then((res) => res.json())
+        .then((data) => setSubjects(data.map(toCamel)))
+        .catch(() => toast.error("Ошибка загрузки предметов"));
+    };
+    fetchSubjects();
+    const ws = new window.WebSocket(`ws://${window.location.host}`);
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.type === "update" && msg.entity === "subjects") {
+        fetchSubjects();
+      }
+    };
+    return () => ws.close();
   }, []);
 
   const columns = [
