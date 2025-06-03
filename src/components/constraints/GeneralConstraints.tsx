@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -69,24 +68,24 @@ export function GeneralConstraints() {
             name="algorithm"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Алгоритм генерации</FormLabel>
+                <FormLabel>Генерация алгоритмі</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger className="mt-1.5">
-                      <SelectValue placeholder="Выберите алгоритм" />
+                      <SelectValue placeholder="Алгоритмді таңдаңыз" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="genetic">Генетический алгоритм</SelectItem>
-                    <SelectItem value="csp">Удовлетворение ограничений (CSP)</SelectItem>
-                    <SelectItem value="greedy">Жадный алгоритм</SelectItem>
+                    <SelectItem value="genetic">Генетикалық алгоритм</SelectItem>
+                    <SelectItem value="csp">Шектеулерді қанағаттандыру (CSP)</SelectItem>
+                    <SelectItem value="greedy">Ашкөз алгоритм</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  Метод оптимизации для составления расписания
+                  Кесте құру үшін оңтайландыру әдісі
                 </FormDescription>
               </FormItem>
             )}
@@ -142,9 +141,9 @@ export function GeneralConstraints() {
             render={({ field }) => (
               <FormItem className="flex items-center justify-between">
                 <div>
-                  <FormLabel>Разрешить окна в расписании</FormLabel>
+                  <FormLabel>Кестеде бос уақытқа рұқсат беру</FormLabel>
                   <FormDescription>
-                    Разрешить свободные часы между занятиями
+                    Сабақтар арасында бос уақытқа рұқсат беру
                   </FormDescription>
                 </div>
                 <FormControl>
@@ -159,9 +158,9 @@ export function GeneralConstraints() {
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-medium">Весовые коэффициенты</h3>
+          <h3 className="text-lg font-medium">Салмақ коэффициенттері</h3>
           <p className="text-sm text-muted-foreground">
-            Настройте значимость различных критериев оптимизации
+            Әр түрлі оңтайландыру критерийлерінің маңыздылығын баптаңыз
           </p>
 
           <div className="space-y-6 mt-4">

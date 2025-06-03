@@ -56,7 +56,7 @@ export function TeachersView() {
       fetch("/api/teachers/")
         .then((res) => res.json())
         .then((data) => setTeachers(data.map(toCamel)))
-        .catch(() => toast.error("Ошибка загрузки преподавателей"));
+        .catch(() => toast.error("Оқытушыларды жүктеу қатесі"));
     };
     fetchTeachers();
     const ws = new window.WebSocket(`ws://${window.location.host}`);
@@ -70,10 +70,10 @@ export function TeachersView() {
   }, []);
 
   const columns = [
-    { header: "ФИО", accessor: "fullName" },
-    { header: "Специализация", accessor: "specialization" },
-    { header: "Стаж", accessor: "experience" },
-    { header: "Контакты", accessor: "contactInfo" },
+    { header: "Аты-жөні", accessor: "fullName" },
+    { header: "Мамандығы", accessor: "specialization" },
+    { header: "Еңбек өтілі", accessor: "experience" },
+    { header: "Байланыс ақпараты", accessor: "contactInfo" },
   ];
 
   const filteredTeachers = teachers.filter((teacher) => {
@@ -95,14 +95,14 @@ export function TeachersView() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        toast.error("Ошибка при добавлении преподавателя: " + (err.detail || res.statusText));
+        toast.error("Оқытушыны қосу қатесі: " + (err.detail || res.statusText));
         return;
       }
       const newTeacher = await res.json();
       setTeachers((prev) => [...prev, newTeacher]);
-      toast.success(`Преподаватель ${data.fullName} добавлен`);
+      toast.success(`"${data.fullName}" оқытушысы қосылды`);
     } catch (e) {
-      toast.error("Ошибка при добавлении преподавателя: " + (e?.message || e));
+      toast.error("Оқытушыны қосу қатесі: " + (e?.message || e));
     }
   };
 
@@ -112,7 +112,7 @@ export function TeachersView() {
       setCurrentTeacher(toCamel(teacherToEdit));
       setIsEditDialogOpen(true);
     } else {
-      toast.error("Преподаватель не найден");
+      toast.error("Оқытушы табылмады");
     }
   };
 
@@ -125,14 +125,14 @@ export function TeachersView() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        toast.error("Ошибка при обновлении преподавателя: " + (err.detail || res.statusText));
+        toast.error("Оқытушыны жаңарту қатесі: " + (err.detail || res.statusText));
         return;
       }
       const newTeacher = await res.json();
       setTeachers((prev) => prev.map((t) => (t.id === newTeacher.id ? newTeacher : t)));
-      toast.success(`Преподаватель ${newTeacher.fullName} обновлен`);
+      toast.success(`"${newTeacher.fullName}" оқытушысы жаңартылды`);
     } catch (e) {
-      toast.error("Ошибка при обновлении преподавателя: " + (e?.message || e));
+      toast.error("Оқытушыны жаңарту қатесі: " + (e?.message || e));
     }
   };
 
@@ -142,7 +142,7 @@ export function TeachersView() {
       setCurrentTeacher(teacherToDelete);
       setIsDeleteDialogOpen(true);
     } else {
-      toast.error("Преподаватель не найден");
+      toast.error("Оқытушы табылмады");
     }
   };
 
@@ -152,12 +152,12 @@ export function TeachersView() {
         const res = await fetch(`/api/teachers/${currentTeacher.id}`, { method: "DELETE" });
         if (!res.ok) throw new Error();
         setTeachers((prev) => prev.filter((t) => t.id !== currentTeacher.id));
-        toast.success(`Преподаватель ${currentTeacher.fullName} удален`);
+        toast.success(`"${currentTeacher.fullName}" оқытушысы жойылды`);
       }
       setIsDeleteDialogOpen(false);
       setCurrentTeacher(null);
     } catch {
-      toast.error("Ошибка при удалении преподавателя");
+      toast.error("Оқытушыны жою қатесі");
     }
   };
 
@@ -165,22 +165,22 @@ export function TeachersView() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Преподаватели</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Оқытушылар</h1>
           <p className="text-muted-foreground">
-            Управление списком преподавателей
+            Оқытушылар тізімін басқару
           </p>
         </div>
         <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus size={16} className="mr-2" />
-          Добавить преподавателя
+          Оқытушы қосу
         </Button>
       </div>
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle>Список преподавателей</CardTitle>
+          <CardTitle>Оқытушылар тізімі</CardTitle>
           <CardDescription>
-            Всего преподавателей: {teachers.length}
+            Барлық оқытушылар саны: {teachers.length}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -189,7 +189,7 @@ export function TeachersView() {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Поиск по преподавателям..."
+                placeholder="Оқытушылар бойынша іздеу..."
                 className="pl-8"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -200,7 +200,7 @@ export function TeachersView() {
           <EntityTable
             columns={columns}
             data={filteredTeachers}
-            title="Преподаватели"
+            title="Оқытушылар"
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
@@ -231,8 +231,8 @@ export function TeachersView() {
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={confirmDelete}
-        title="Удаление преподавателя"
-        description={currentTeacher ? `Вы действительно хотите удалить преподавателя ${currentTeacher.fullName}? Это действие невозможно отменить.` : "Подтвердите удаление преподавателя"}
+        title="Оқытушыны жою"
+        description={currentTeacher ? `Сіз шынымен ${currentTeacher.fullName} оқытушысын жойғыңыз келе ме? Бұл әрекетті қайтару мүмкін емес.` : "Оқытушыны жоюды растаңыз"}
       />
     </div>
   );

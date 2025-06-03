@@ -18,12 +18,12 @@ interface SchedulePreviewProps {
 }
 
 const days = [
-  { value: "monday", label: "Понедельник" },
-  { value: "tuesday", label: "Вторник" },
-  { value: "wednesday", label: "Среда" },
-  { value: "thursday", label: "Четверг" },
-  { value: "friday", label: "Пятница" },
-  { value: "saturday", label: "Суббота" },
+  { value: "monday", label: "Дүйсенбі" },
+  { value: "tuesday", label: "Сейсенбі" },
+  { value: "wednesday", label: "Сәрсенбі" },
+  { value: "thursday", label: "Бейсенбі" },
+  { value: "friday", label: "Жұма" },
+  { value: "saturday", label: "Сенбі" },
 ];
 const times = [
   "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"
@@ -43,7 +43,7 @@ export function SchedulePreview({ filterType, filterValue }: SchedulePreviewProp
         setLoading(false);
       })
       .catch(() => {
-        setError("Ошибка загрузки расписания");
+        setError("Кестені жүктеу қатесі");
         setLoading(false);
       });
   }, []);
@@ -154,25 +154,17 @@ export function SchedulePreview({ filterType, filterValue }: SchedulePreviewProp
             const lessons = grid[day.value][time];
             return (
               <div key={`${day.value}-${time}`} className="schedule-cell">
-                {Array.isArray(lessons) && lessons.length > 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%', justifyContent: 'center' }}>
-                    {lessons.map((lesson, idx) => (
-                      <div key={lesson.id} className={`schedule-class ${lesson.type || ''}`} style={{ minWidth: 120, maxWidth: 180 }}>
-                        <div className="font-medium">{lesson.subject}</div>
-                        <div className="text-xs text-gray-600 mt-1">Группа: {lesson.group}</div>
-                        <div className="text-xs text-gray-600">Преп: {lesson.teacher}</div>
-                        <div className="text-xs text-gray-600">Ауд: {lesson.room}</div>
-                        <div className="text-xs text-gray-400">{lesson.timeStart} - {lesson.timeEnd}</div>
-                      </div>
-                    ))}
+                {lessons.map(lesson => (
+                  <div key={lesson.id} className={`schedule-class ${lesson.type || ''}`}>
+                    {lesson.subject}
                   </div>
-                )}
+                ))}
               </div>
             );
           })}
         </React.Fragment>
       ))}
-      {loading && <div className="absolute left-0 right-0 top-0 bottom-0 flex items-center justify-center bg-white/70 z-10">Загрузка...</div>}
+      {loading && <div className="absolute left-0 right-0 top-0 bottom-0 flex items-center justify-center bg-white/70 z-10">Жүктелуде...</div>}
       {error && <div className="absolute left-0 right-0 top-0 bottom-0 flex items-center justify-center text-red-500 bg-white/80 z-10">{error}</div>}
     </div>
   );

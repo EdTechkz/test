@@ -24,9 +24,9 @@ import {
 import { toast } from "sonner";
 
 const formSchema = z.object({
-  number: z.string().min(1, { message: "Номер аудитории обязателен" }),
-  type: z.string().min(1, { message: "Тип аудитории обязателен" }),
-  capacity: z.coerce.number().min(1, { message: "Вместимость должна быть больше 0" }),
+  number: z.string().min(1, { message: "Аудитория нөірі міндетті" }),
+  type: z.string().min(1, { message: "Аудитория түрі міндетті" }),
+  capacity: z.coerce.number().min(1, { message: "Сыйымдылық 0-ден көп болуы керек" }),
   equipment: z.string().optional(),
 });
 
@@ -76,7 +76,7 @@ export function RoomDialog({
       onOpenChange(false);
     } catch (error) {
       console.error("Error submitting form:", error);
-      toast.error("Ошибка при сохранении данных");
+      toast.error("Деректерді сақтау кезінде қате пайда болды");
     }
   };
 
@@ -89,11 +89,11 @@ export function RoomDialog({
     }}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Редактирование аудитории" : "Добавление аудитории"}</DialogTitle>
+          <DialogTitle>{isEditing ? "Аудиторияны өңдеу" : "Аудитория қосу"}</DialogTitle>
           <DialogDescription>
-            {isEditing 
-              ? "Измените данные аудитории и нажмите сохранить" 
-              : "Заполните информацию о новой аудитории"}
+            {isEditing
+              ? "Аудитория деректерін өзгертіп, сақтау түймесін басыңыз"
+              : "Жаңа аудитория туралы ақпаратты толтырыңыз"}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -103,7 +103,7 @@ export function RoomDialog({
               name="number"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Номер аудитории</FormLabel>
+                  <FormLabel>Аудитория нөмірі</FormLabel>
                   <Input placeholder="201" {...field} />
                   <FormMessage />
                 </FormItem>
@@ -114,8 +114,8 @@ export function RoomDialog({
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Тип аудитории</FormLabel>
-                  <Input placeholder="Лекционная" {...field} />
+                  <FormLabel>Аудитория түрі</FormLabel>
+                  <Input placeholder="Дәрісхана" {...field} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -125,7 +125,7 @@ export function RoomDialog({
               name="capacity"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Вместимость</FormLabel>
+                  <FormLabel>Сыйымдылығы</FormLabel>
                   <Input
                     type="number"
                     placeholder="30"
@@ -144,7 +144,7 @@ export function RoomDialog({
               name="equipment"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Оборудование</FormLabel>
+                  <FormLabel>Жабдықтары</FormLabel>
                   <Input placeholder="Проектор, компьютер" {...field} />
                   <FormMessage />
                 </FormItem>
@@ -152,9 +152,9 @@ export function RoomDialog({
             />
             <DialogFooter className="pt-4">
               <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
-                Отмена
+                Бас тарту
               </Button>
-              <Button type="submit">Сохранить</Button>
+              <Button type="submit">Сақтау</Button>
             </DialogFooter>
           </form>
         </Form>

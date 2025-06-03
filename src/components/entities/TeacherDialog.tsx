@@ -23,10 +23,10 @@ import {
 import { toast } from "sonner";
 
 const formSchema = z.object({
-  fullName: z.string().min(1, { message: "ФИО обязательно" }),
-  specialization: z.string().min(1, { message: "Специализация обязательна" }),
-  experience: z.string().min(1, { message: "Стаж обязателен" }),
-  contactInfo: z.string().min(1, { message: "Контактная информация обязательна" }),
+  fullName: z.string().min(1, { message: "Оқытушының аты-жөні міндетті" }),
+  specialization: z.string().min(1, { message: "Мамандығы міндетті" }),
+  experience: z.string().min(1, { message: "Еңбек өтілі міндетті" }),
+  contactInfo: z.string().min(1, { message: "Байланыс ақпараты міндетті" }),
 });
 
 type TeacherFormValues = z.infer<typeof formSchema>;
@@ -75,7 +75,7 @@ export function TeacherDialog({
       onOpenChange(false);
     } catch (error) {
       console.error("Error submitting form:", error);
-      toast.error("Ошибка при сохранении данных");
+      toast.error("Деректерді сақтау кезінде қате пайда болды");
     }
   };
 
@@ -88,11 +88,11 @@ export function TeacherDialog({
     }}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Редактирование преподавателя" : "Добавление преподавателя"}</DialogTitle>
+          <DialogTitle>{isEditing ? "Оқытушыны өңдеу" : "Оқытушы қосу"}</DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Измените данные преподавателя и нажмите сохранить"
-              : "Заполните информацию о новом преподавателе"}
+              ? "Оқытушы деректерін өзгертіп, сақтау түймесін басыңыз"
+              : "Жаңа оқытушы туралы ақпаратты толтырыңыз"}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -102,8 +102,8 @@ export function TeacherDialog({
               name="fullName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>ФИО</FormLabel>
-                  <Input placeholder="Иванов Иван Иванович" {...field} />
+                  <FormLabel>Аты-жөні</FormLabel>
+                  <Input placeholder="Айдосов Айдос Айдынұлы" {...field} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -113,7 +113,7 @@ export function TeacherDialog({
               name="specialization"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Специализация</FormLabel>
+                  <FormLabel>Мамандығы</FormLabel>
                   <Input placeholder="Математика" {...field} />
                   <FormMessage />
                 </FormItem>
@@ -124,8 +124,8 @@ export function TeacherDialog({
               name="experience"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Стаж</FormLabel>
-                  <Input placeholder="10 лет" {...field} />
+                  <FormLabel>Еңбек өтілі</FormLabel>
+                  <Input placeholder="10 жыл" {...field} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -135,17 +135,17 @@ export function TeacherDialog({
               name="contactInfo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Контактная информация</FormLabel>
-                  <Input placeholder="ivanov@college.edu" {...field} />
+                  <FormLabel>Байланыс ақпараты</FormLabel>
+                  <Input placeholder="aidosov@college.edu" {...field} />
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter className="pt-4">
               <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
-                Отмена
+                Бас тарту
               </Button>
-              <Button type="submit">Сохранить</Button>
+              <Button type="submit">Сақтау</Button>
             </DialogFooter>
           </form>
         </Form>

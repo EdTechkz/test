@@ -28,8 +28,8 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     if (this.state.hasError) {
       return (
         <div style={{ padding: 32, textAlign: 'center' }}>
-          <h1 style={{ color: '#ef4444', fontSize: 28, marginBottom: 16 }}>Произошла ошибка</h1>
-          <p style={{ color: '#555', marginBottom: 16 }}>Что-то пошло не так. Попробуйте обновить страницу или обратитесь к администратору.</p>
+          <h1 style={{ color: '#ef4444', fontSize: 28, marginBottom: 16 }}>Қате орын алды</h1>
+          <p style={{ color: '#555', marginBottom: 16 }}>Бірдеңе дұрыс болмады. Бетті жаңартып көріңіз немесе әкімшіге хабарласыңыз.</p>
           {this.state.error && (
             <pre style={{ color: '#ef4444', background: '#f3f4f6', padding: 16, borderRadius: 8, maxWidth: 600, margin: '0 auto', overflowX: 'auto' }}>
               {this.state.error.message}

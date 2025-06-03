@@ -24,9 +24,9 @@ import {
 import { toast } from "sonner";
 
 const formSchema = z.object({
-  name: z.string().min(1, { message: "Название группы обязательно" }),
+  name: z.string().min(1, { message: "Топ атауы міндетті" }),
   specialization: z.string().optional(),
-  numberOfStudents: z.coerce.number().min(1, { message: "Количество студентов должно быть больше 0" }),
+  numberOfStudents: z.coerce.number().min(1, { message: "Студенттер саны 0-ден көп болуы керек" }),
   curator: z.string().optional(),
 });
 
@@ -76,7 +76,7 @@ export function GroupDialog({
       onOpenChange(false);
     } catch (error) {
       console.error("Error submitting form:", error);
-      toast.error("Ошибка при сохранении данных");
+      toast.error("Деректерді сақтау кезінде қате пайда болды");
     }
   };
 
@@ -89,11 +89,11 @@ export function GroupDialog({
     }}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Редактирование группы" : "Добавление группы"}</DialogTitle>
+          <DialogTitle>{isEditing ? "Топты өңдеу" : "Топ қосу"}</DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Измените данные группы и нажмите сохранить"
-              : "Заполните информацию о новой группе"}
+              ? "Топ деректерін өзгертіп, сақтау түймесін басыңыз"
+              : "Жаңа топ туралы ақпаратты толтырыңыз"}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -103,7 +103,7 @@ export function GroupDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Название группы</FormLabel>
+                  <FormLabel>Топ атауы</FormLabel>
                   <Input placeholder="ИС-11" {...field} />
                   <FormMessage />
                 </FormItem>
@@ -114,8 +114,8 @@ export function GroupDialog({
               name="specialization"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Специальность</FormLabel>
-                  <Input placeholder="Информационные системы" {...field} />
+                  <FormLabel>Мамандығы</FormLabel>
+                  <Input placeholder="Информатика" {...field} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -125,7 +125,7 @@ export function GroupDialog({
               name="numberOfStudents"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Количество студентов</FormLabel>
+                  <FormLabel>Студенттер саны</FormLabel>
                   <Input
                     type="number"
                     placeholder="25"
@@ -152,9 +152,9 @@ export function GroupDialog({
             />
             <DialogFooter className="pt-4">
               <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
-                Отмена
+                Бас тарту
               </Button>
-              <Button type="submit">Сохранить</Button>
+              <Button type="submit">Сақтау</Button>
             </DialogFooter>
           </form>
         </Form>

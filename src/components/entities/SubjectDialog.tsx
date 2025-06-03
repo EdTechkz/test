@@ -23,10 +23,10 @@ import {
 import { toast } from "sonner";
 
 const formSchema = z.object({
-  name: z.string().min(1, { message: "Название предмета обязательно" }),
-  hoursPerWeek: z.coerce.number().min(1, { message: "Часов в неделю должно быть больше 0" }),
-  type: z.string().min(1, { message: "Тип предмета обязателен" }),
-  department: z.string().min(1, { message: "Отделение обязательно" }),
+  name: z.string().min(1, { message: "Пән атауы міндетті" }),
+  hoursPerWeek: z.coerce.number().min(1, { message: "Аптасына сағат саны 0-ден көп болуы керек" }),
+  type: z.string().min(1, { message: "Пән түрі міндетті" }),
+  department: z.string().min(1, { message: "Бөлім міндетті" }),
 });
 
 type SubjectFormValues = z.infer<typeof formSchema>;
@@ -75,7 +75,7 @@ export function SubjectDialog({
       onOpenChange(false);
     } catch (error) {
       console.error("Error submitting form:", error);
-      toast.error("Ошибка при сохранении данных");
+      toast.error("Деректерді сақтау кезінде қате пайда болды");
     }
   };
 
@@ -88,11 +88,11 @@ export function SubjectDialog({
     }}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Редактирование предмета" : "Добавление предмета"}</DialogTitle>
+          <DialogTitle>{isEditing ? "Пәнді өңдеу" : "Пән қосу"}</DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Измените данные предмета и нажмите сохранить"
-              : "Заполните информацию о новом предмете"}
+              ? "Пән деректерін өзгертіп, сақтау түймесін басыңыз"
+              : "Жаңа пән туралы ақпаратты толтырыңыз"}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -102,7 +102,7 @@ export function SubjectDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Название предмета</FormLabel>
+                  <FormLabel>Пән атауы</FormLabel>
                   <Input placeholder="Математика" {...field} />
                   <FormMessage />
                 </FormItem>
@@ -113,7 +113,7 @@ export function SubjectDialog({
               name="hoursPerWeek"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Часов в неделю</FormLabel>
+                  <FormLabel>Аптасына сағат</FormLabel>
                   <Input
                     type="number"
                     placeholder="6"
@@ -132,8 +132,8 @@ export function SubjectDialog({
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Тип предмета</FormLabel>
-                  <Input placeholder="Общеобразовательная" {...field} />
+                  <FormLabel>Пән түрі</FormLabel>
+                  <Input placeholder="Жалпы білім беру" {...field} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -143,17 +143,17 @@ export function SubjectDialog({
               name="department"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Отделение</FormLabel>
-                  <Input placeholder="Естественные науки" {...field} />
+                  <FormLabel>Бөлімі</FormLabel>
+                  <Input placeholder="Жаратылыстану ғылымдары" {...field} />
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter className="pt-4">
               <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
-                Отмена
+                Бас тарту
               </Button>
-              <Button type="submit">Сохранить</Button>
+              <Button type="submit">Сақтау</Button>
             </DialogFooter>
           </form>
         </Form>

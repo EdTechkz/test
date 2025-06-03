@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -32,18 +31,18 @@ export function ConstraintsView() {
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle>Параметры ограничений</CardTitle>
+          <CardTitle>Шектеу параметрлері</CardTitle>
           <CardDescription>
-            Задайте ограничения для составления расписания
+            Кесте құру үшін шектеулерді орнатыңыз
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="general" className="space-y-4">
             <TabsList>
-              <TabsTrigger value="general">Общие</TabsTrigger>
-              <TabsTrigger value="teachers">Преподаватели</TabsTrigger>
-              <TabsTrigger value="time">Временные слоты</TabsTrigger>
-              <TabsTrigger value="rooms">Аудитории</TabsTrigger>
+              <TabsTrigger value="general">Жалпы</TabsTrigger>
+              <TabsTrigger value="teachers">Оқытушылар</TabsTrigger>
+              <TabsTrigger value="time">Уақыт слоттары</TabsTrigger>
+              <TabsTrigger value="rooms">Аудиториялар</TabsTrigger>
             </TabsList>
             <TabsContent value="general">
               <GeneralConstraints />
@@ -60,8 +59,8 @@ export function ConstraintsView() {
           </Tabs>
         </CardContent>
         <CardFooter className="border-t pt-4 flex justify-between">
-          <Button variant="outline">Сбросить настройки</Button>
-          <Button onClick={() => setIsGeneratorOpen(true)}>Сгенерировать расписание</Button>
+          <Button variant="outline">Баптауларды тастау</Button>
+          <Button onClick={() => setIsGeneratorOpen(true)}>Кестені генерациялау</Button>
         </CardFooter>
       </Card>
 

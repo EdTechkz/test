@@ -1,4 +1,3 @@
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,8 +25,8 @@ export function DeleteConfirmationDialog({
   onConfirm,
   title,
   description,
-  cancelButtonText = "Отмена",
-  confirmButtonText = "Удалить",
+  cancelButtonText = "Бас тарту",
+  confirmButtonText = "Жою",
 }: DeleteConfirmationDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>

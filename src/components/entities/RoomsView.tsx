@@ -59,7 +59,7 @@ export function RoomsView() {
       fetch("/api/rooms/")
         .then((res) => res.json())
         .then((data) => setRooms(data.map(toCamel)))
-        .catch(() => toast.error("Ошибка загрузки аудиторий"));
+        .catch(() => toast.error("Аудиторияларды жүктеу қатесі"));
     };
     fetchRooms();
     const ws = new window.WebSocket(`ws://${window.location.host}`);
@@ -87,6 +87,9 @@ export function RoomsView() {
   }, [rooms, searchQuery]);
 
   const columns = [
+    { header: "Аудитория нөмірі", accessor: "number" },
+    { header: "Түрі", accessor: "type" },
+    { header: "Сыйымдылығы", accessor: "capacity" },
     { header: "Номер", accessor: "number" },
     { header: "Тип", accessor: "type" },
     { header: "Вместимость", accessor: "capacity" },
@@ -102,14 +105,14 @@ export function RoomsView() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        toast.error("Ошибка при добавлении аудитории: " + (err.detail || res.statusText));
+        toast.error("Аудиторияны қосу қатесі: " + (err.detail || res.statusText));
         return;
       }
       const newRoom = await res.json();
       setRooms((prev) => [...prev, newRoom]);
-      toast.success(`Аудитория ${data.number} добавлена`);
+      toast.success(`"${data.number}" аудиториясы қосылды`);
     } catch (e) {
-      toast.error("Ошибка при добавлении аудитории: " + (e?.message || e));
+      toast.error("Аудиторияны қосу қатесі: " + (e?.message || e));
     }
   };
 
@@ -119,7 +122,7 @@ export function RoomsView() {
       setCurrentRoom(toCamel(roomToEdit));
       setIsEditDialogOpen(true);
     } else {
-      toast.error("Аудитория не найдена");
+      toast.error("Аудитория табылмады");
     }
   };
 
@@ -132,14 +135,14 @@ export function RoomsView() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        toast.error("Ошибка при обновлении аудитории: " + (err.detail || res.statusText));
+        toast.error("Аудиторияны жаңарту қатесі: " + (err.detail || res.statusText));
         return;
       }
       const newRoom = await res.json();
       setRooms((prev) => prev.map((r) => (r.id === newRoom.id ? newRoom : r)));
-      toast.success(`Аудитория ${newRoom.number} обновлена`);
+      toast.success(`"${newRoom.number}" аудиториясы жаңартылды`);
     } catch (e) {
-      toast.error("Ошибка при обновлении аудитории: " + (e?.message || e));
+      toast.error("Аудиторияны жаңарту қатесі: " + (e?.message || e));
     }
   };
 
@@ -149,7 +152,7 @@ export function RoomsView() {
       setCurrentRoom(roomToDelete);
       setIsDeleteDialogOpen(true);
     } else {
-      toast.error("Аудитория не найдена");
+      toast.error("Аудитория табылмады");
     }
   };
 
@@ -159,12 +162,12 @@ export function RoomsView() {
         const res = await fetch(`/api/rooms/${currentRoom.id}`, { method: "DELETE" });
         if (!res.ok) throw new Error();
         setRooms((prev) => prev.filter((r) => r.id !== currentRoom.id));
-        toast.success(`Аудитория ${currentRoom.number} удалена`);
+        toast.success(`"${currentRoom.number}" аудиториясы жойылды`);
       }
       setIsDeleteDialogOpen(false);
       setCurrentRoom(null);
     } catch {
-      toast.error("Ошибка при удалении аудитории");
+      toast.error("Аудиторияны жою қатесі");
     }
   };
 
@@ -172,22 +175,22 @@ export function RoomsView() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Аудитории</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Аудиториялар</h1>
           <p className="text-muted-foreground">
-            Управление учебными аудиториями
+            Оқу аудиторияларын басқару
           </p>
         </div>
         <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus size={16} className="mr-2" />
-          Добавить аудиторию
+          Аудитория қосу
         </Button>
       </div>
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle>Список аудиторий</CardTitle>
+          <CardTitle>Аудиториялар тізімі</CardTitle>
           <CardDescription>
-            Всего аудиторий: {rooms.length}
+            Барлық аудиториялар саны: {rooms.length}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -196,7 +199,7 @@ export function RoomsView() {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Поиск по аудиториям..."
+                placeholder="Аудиториялар бойынша іздеу..."
                 className="pl-8"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -207,7 +210,7 @@ export function RoomsView() {
           <EntityTable
             columns={columns}
             data={filteredRooms}
-            title="Аудитории"
+            title="Аудиториялар"
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
@@ -238,8 +241,8 @@ export function RoomsView() {
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={confirmDelete}
-        title="Удаление аудитории"
-        description={currentRoom ? `Вы действительно хотите удалить аудиторию ${currentRoom.number}? Это действие невозможно отменить.` : "Подтвердите удаление аудитории"}
+        title="Аудиторияны жою"
+        description={currentRoom ? `Сіз шынымен ${currentRoom.number} аудиториясын жойғыңыз келе ме? Бұл әрекетті қайтару мүмкін емес.` : "Аудиторияны жоюды растаңыз"}
       />
     </div>
   );

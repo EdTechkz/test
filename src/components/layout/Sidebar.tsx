@@ -9,20 +9,27 @@ import {
   Settings2,
 } from "lucide-react";
 
+/*
+  Sidebar.tsx — компонент бокового меню (навигация).
+  Отвечает за отображение пунктов меню для перехода между основными разделами приложения.
+  Используется на всех страницах как постоянная навигация.
+*/
+
+// Sidebar — компонент бокового меню навигации по разделам приложения
 export function Sidebar() {
   const menuItems = [
-    { title: "Главная", icon: <Home size={20} />, path: "/" },
-    { title: "Расписание", icon: <Calendar size={20} />, path: "/schedule" },
-    { title: "Группы", icon: <Users size={20} />, path: "/groups" },
-    { title: "Преподаватели", icon: <UserSquare size={20} />, path: "/teachers" },
-    { title: "Аудитории", icon: <Home size={20} />, path: "/rooms" },
-    { title: "Предметы", icon: <GraduationCap size={20} />, path: "/subjects" },
+    { title: "Басты бет", icon: <Home size={20} />, path: "/" },
+    { title: "Кесте", icon: <Calendar size={20} />, path: "/schedule" },
+    { title: "Топтар", icon: <Users size={20} />, path: "/groups" },
+    { title: "Оқытушылар", icon: <UserSquare size={20} />, path: "/teachers" },
+    { title: "Аудиториялар", icon: <Home size={20} />, path: "/rooms" },
+    { title: "Пәндер", icon: <GraduationCap size={20} />, path: "/subjects" },
   ];
 
   return (
     <aside className="hidden md:flex flex-col w-64 bg-white border-r">
       <div className="flex items-center justify-center h-16 border-b bg-primary">
-        <h2 className="text-xl font-bold text-white">Расписание Колледжа</h2>
+        <h2 className="text-xl font-bold text-white">Колледж кестесі</h2>
       </div>
       <nav className="flex-1 overflow-y-auto p-4">
         <ul className="space-y-2">
@@ -41,17 +48,6 @@ export function Sidebar() {
           ))}
         </ul>
       </nav>
-      <div className="p-4 border-t">
-        <div className="flex items-center">
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white">
-            A
-          </div>
-          <div className="ml-3">
-            <p className="text-sm font-medium">Администратор</p>
-            <p className="text-xs text-gray-500">admin@college.edu</p>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 }

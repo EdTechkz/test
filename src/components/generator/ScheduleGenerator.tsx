@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,12 +25,12 @@ export function ScheduleGenerator({ onClose }: ScheduleGeneratorProps) {
   const navigate = useNavigate();
   
   const steps = [
-    { name: "Проверка данных", description: "Проверка данных на полноту и корректность" },
-    { name: "Валидация ограничений", description: "Проверка совместимости всех ограничений" },
-    { name: "Генерация начальных решений", description: "Создание исходной популяции решений" },
-    { name: "Оптимизация", description: "Улучшение расписания методом оптимизации" },
-    { name: "Проверка качества", description: "Проверка критериев оптимальности расписания" },
-    { name: "Сохранение результатов", description: "Сохранение оптимального расписания" },
+    { name: "Деректерді тексеру", description: "Деректердің толықтығы мен дұрыстығын тексеру" },
+    { name: "Шектеулерді тексеру", description: "Барлық шектеулердің үйлесімділігін тексеру" },
+    { name: "Бастапқы шешімдерді генерациялау", description: "Бастапқы шешімдер популяциясын құру" },
+    { name: "Оптимизация", description: "Кестені оңтайландыру әдісімен жақсарту" },
+    { name: "Сапаны тексеру", description: "Кестенің оңтайлылық критерийлерін тексеру" },
+    { name: "Нәтижелерді сақтау", description: "Оңтайлы кестені сақтау" },
   ];
 
   useEffect(() => {
@@ -82,9 +81,9 @@ export function ScheduleGenerator({ onClose }: ScheduleGeneratorProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Генерация расписания</DialogTitle>
+          <DialogTitle>Кестені генерациялау</DialogTitle>
           <DialogDescription>
-            Идёт процесс автоматической генерации оптимального расписания
+            Оңтайлы кестені автоматты түрде генерациялау жүріп жатыр
           </DialogDescription>
         </DialogHeader>
         
@@ -93,10 +92,10 @@ export function ScheduleGenerator({ onClose }: ScheduleGeneratorProps) {
             <Progress value={progress} className="h-2" />
             <p className="text-sm text-center">
               {progress < 100 
-                ? `Выполнено ${Math.round(progress)}%`
+                ? `Орындалды ${Math.round(progress)}%`
                 : success 
-                  ? "Расписание успешно сгенерировано!"
-                  : "Не удалось сгенерировать оптимальное расписание"
+                  ? "Кесте сәтті генерацияланды!"
+                  : "Оңтайлы кестені генерациялау мүмкін болмады"
               }
             </p>
           </div>
@@ -122,9 +121,9 @@ export function ScheduleGenerator({ onClose }: ScheduleGeneratorProps) {
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
                   <div>
-                    <h4 className="font-medium">Расписание успешно сгенерировано</h4>
+                    <h4 className="font-medium">Кесте сәтті генерацияланды</h4>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Расписание создано без конфликтов. Оптимальность: 87%
+                      Кесте қақтығыстарсыз құрылды. Оңтайлылық: 87%
                     </p>
                   </div>
                 </div>
@@ -132,9 +131,9 @@ export function ScheduleGenerator({ onClose }: ScheduleGeneratorProps) {
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
                   <div>
-                    <h4 className="font-medium">Обнаружены конфликты</h4>
+                    <h4 className="font-medium">Қақтығыстар анықталды</h4>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Некоторые ограничения не удалось удовлетворить. Рекомендуется скорректировать параметры.
+                      Кейбір шектеулерді қанағаттандыру мүмкін болмады. Параметрлерді түзету ұсынылады.
                     </p>
                   </div>
                 </div>
@@ -147,15 +146,15 @@ export function ScheduleGenerator({ onClose }: ScheduleGeneratorProps) {
           {progress === 100 ? (
             <>
               <Button variant="outline" onClick={handleClose}>
-                Закрыть
+                Жабу
               </Button>
               <Button onClick={handleViewSchedule}>
-                Просмотр расписания
+                Кестені қарау
               </Button>
             </>
           ) : (
             <Button variant="outline" onClick={handleClose}>
-              Отменить
+              Бас тарту
             </Button>
           )}
         </DialogFooter>

@@ -50,7 +50,7 @@ export function GroupsView() {
       fetch("/api/groups/")
         .then((res) => res.json())
         .then((data) => setGroups(data.map(toCamel)))
-        .catch(() => toast.error("Ошибка загрузки групп"));
+        .catch(() => toast.error("Топтарды жүктеу қатесі"));
     };
     fetchGroups();
     const ws = new window.WebSocket(`ws://${window.location.host}`);
@@ -64,9 +64,9 @@ export function GroupsView() {
   }, []);
 
   const columns = [
-    { header: "Группа", accessor: "name" },
-    { header: "Специальность", accessor: "specialization" },
-    { header: "Кол-во студентов", accessor: "numberOfStudents" },
+    { header: "Топ атауы", accessor: "name" },
+    { header: "Мамандығы", accessor: "specialization" },
+    { header: "Студенттер саны", accessor: "numberOfStudents" },
     { header: "Куратор", accessor: "curator" },
   ];
 
@@ -89,14 +89,14 @@ export function GroupsView() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        toast.error("Ошибка при добавлении группы: " + (err.detail || res.statusText));
+        toast.error("Топты қосу қатесі: " + (err.detail || res.statusText));
         return;
       }
       const newGroup = await res.json();
       setGroups((prev) => [...prev, newGroup]);
-      toast.success(`Группа ${data.name} добавлена`);
+      toast.success(`"${data.name}" тобы қосылды`);
     } catch (e) {
-      toast.error("Ошибка при добавлении группы: " + (e?.message || e));
+      toast.error("Топты қосу қатесі: " + (e?.message || e));
     }
   };
 
@@ -106,7 +106,7 @@ export function GroupsView() {
       setCurrentGroup(toCamel(groupToEdit));
       setIsEditDialogOpen(true);
     } else {
-      toast.error("Группа не найдена");
+      toast.error("Топ табылмады");
     }
   };
 
@@ -119,14 +119,14 @@ export function GroupsView() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        toast.error("Ошибка при обновлении группы: " + (err.detail || res.statusText));
+        toast.error("Топты жаңарту қатесі: " + (err.detail || res.statusText));
         return;
       }
       const newGroup = await res.json();
       setGroups((prev) => prev.map((g) => (g.id === newGroup.id ? newGroup : g)));
-      toast.success(`Группа ${newGroup.name} обновлена`);
+      toast.success(`"${newGroup.name}" тобы жаңартылды`);
     } catch (e) {
-      toast.error("Ошибка при обновлении группы: " + (e?.message || e));
+      toast.error("Топты жаңарту қатесі: " + (e?.message || e));
     }
   };
 
@@ -136,7 +136,7 @@ export function GroupsView() {
       setCurrentGroup(groupToDelete);
       setIsDeleteDialogOpen(true);
     } else {
-      toast.error("Группа не найдена");
+      toast.error("Топ табылмады");
     }
   };
 
@@ -146,12 +146,12 @@ export function GroupsView() {
         const res = await fetch(`/api/groups/${currentGroup.id}`, { method: "DELETE" });
         if (!res.ok) throw new Error();
         setGroups((prev) => prev.filter((g) => g.id !== currentGroup.id));
-        toast.success(`Группа ${currentGroup.name} удалена`);
+        toast.success(`"${currentGroup.name}" тобы жойылды`);
       }
       setIsDeleteDialogOpen(false);
       setCurrentGroup(null);
     } catch {
-      toast.error("Ошибка при удалении группы");
+      toast.error("Топты жою қатесі");
     }
   };
 
@@ -159,23 +159,21 @@ export function GroupsView() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Группы</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Топтар</h1>
           <p className="text-muted-foreground">
-            Управление учебными группами
+            Оқу топтарын басқару
           </p>
         </div>
         <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus size={16} className="mr-2" />
-          Добавить группу
+          Топ қосу
         </Button>
       </div>
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle>Список групп</CardTitle>
-          <CardDescription>
-            Всего групп: {groups.length}
-          </CardDescription>
+          <CardTitle>Топтар тізімі</CardTitle>
+          <CardDescription>Барлық топтар саны: {groups.length}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center mb-4">
@@ -183,7 +181,7 @@ export function GroupsView() {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Поиск по группам..."
+                placeholder="Топтар бойынша іздеу..."
                 className="pl-8"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -194,7 +192,7 @@ export function GroupsView() {
           <EntityTable
             columns={columns}
             data={filteredGroups}
-            title="Учебные группы"
+            title="Оқу топтары"
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
@@ -225,8 +223,8 @@ export function GroupsView() {
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={confirmDelete}
-        title="Удаление группы"
-        description={currentGroup ? `Вы действительно хотите удалить группу ${currentGroup.name}? Это действие невозможно отменить.` : "Подтвердите удаление группы"}
+        title="Топты жою"
+        description={currentGroup ? `Сіз шынымен ${currentGroup.name} тобын жойғыңыз келе ме? Бұл әрекетті қайтару мүмкін емес.` : "Топты жоюды растаңыз"}
       />
     </div>
   );

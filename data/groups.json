@@ -5,5 +5,12 @@
     "number_of_students": 5,
     "curator": "вы",
     "id": 1748941909253
+  },
+  {
+    "name": "мав",
+    "specialization": "ма",
+    "number_of_students": 25,
+    "curator": "австрийки",
+    "id": 1748951072270
   }
 ]

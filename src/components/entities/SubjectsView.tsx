@@ -50,7 +50,7 @@ export function SubjectsView() {
       fetch("/api/subjects/")
         .then((res) => res.json())
         .then((data) => setSubjects(data.map(toCamel)))
-        .catch(() => toast.error("Ошибка загрузки предметов"));
+        .catch(() => toast.error("Пәндерді жүктеу қатесі"));
     };
     fetchSubjects();
     const ws = new window.WebSocket(`ws://${window.location.host}`);
@@ -64,10 +64,10 @@ export function SubjectsView() {
   }, []);
 
   const columns = [
-    { header: "Предмет", accessor: "name" },
-    { header: "Часов в неделю", accessor: "hoursPerWeek" },
-    { header: "Тип", accessor: "type" },
-    { header: "Отделение", accessor: "department" },
+    { header: "Пән атауы", accessor: "name" },
+    { header: "Аптасына сағат", accessor: "hoursPerWeek" },
+    { header: "Түрі", accessor: "type" },
+    { header: "Бөлімі", accessor: "department" },
   ];
 
   const filteredSubjects = subjects.filter((subject) => {
@@ -89,14 +89,14 @@ export function SubjectsView() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        toast.error("Ошибка при добавлении предмета: " + (err.detail || res.statusText));
+        toast.error("Пәнді қосу қатесі: " + (err.detail || res.statusText));
         return;
       }
       const newSubject = await res.json();
       setSubjects((prev) => [...prev, newSubject]);
-      toast.success(`Предмет ${data.name} добавлен`);
+      toast.success(`"${data.name}" пәні қосылды`);
     } catch (e) {
-      toast.error("Ошибка при добавлении предмета: " + (e?.message || e));
+      toast.error("Пәнді қосу қатесі: " + (e?.message || e));
     }
   };
 
@@ -106,7 +106,7 @@ export function SubjectsView() {
       setCurrentSubject(toCamel(subjectToEdit));
       setIsEditDialogOpen(true);
     } else {
-      toast.error("Предмет не найден");
+      toast.error("Пән табылмады");
     }
   };
 
@@ -119,14 +119,14 @@ export function SubjectsView() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        toast.error("Ошибка при обновлении предмета: " + (err.detail || res.statusText));
+        toast.error("Пәнді жаңарту қатесі: " + (err.detail || res.statusText));
         return;
       }
       const newSubject = await res.json();
       setSubjects((prev) => prev.map((s) => (s.id === newSubject.id ? newSubject : s)));
-      toast.success(`Предмет ${newSubject.name} обновлен`);
+      toast.success(`"${newSubject.name}" пәні жаңартылды`);
     } catch (e) {
-      toast.error("Ошибка при обновлении предмета: " + (e?.message || e));
+      toast.error("Пәнді жаңарту қатесі: " + (e?.message || e));
     }
   };
 
@@ -136,7 +136,7 @@ export function SubjectsView() {
       setCurrentSubject(subjectToDelete);
       setIsDeleteDialogOpen(true);
     } else {
-      toast.error("Предмет не найден");
+      toast.error("Пән табылмады");
     }
   };
 
@@ -146,12 +146,12 @@ export function SubjectsView() {
         const res = await fetch(`/api/subjects/${currentSubject.id}`, { method: "DELETE" });
         if (!res.ok) throw new Error();
         setSubjects((prev) => prev.filter((s) => s.id !== currentSubject.id));
-        toast.success(`Предмет ${currentSubject.name} удален`);
+        toast.success(`"${currentSubject.name}" пәні жойылды`);
       }
       setIsDeleteDialogOpen(false);
       setCurrentSubject(null);
     } catch {
-      toast.error("Ошибка при удалении предмета");
+      toast.error("Пәнді жою қатесі");
     }
   };
 
@@ -159,23 +159,21 @@ export function SubjectsView() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Учебные предметы</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Оқу пәндері</h1>
           <p className="text-muted-foreground">
-            Управление учебными дисциплинами
+            Оқу пәндерін басқару
           </p>
         </div>
         <Button onClick={() => setIsAddDialogOpen(true)}>
           <Plus size={16} className="mr-2" />
-          Добавить предмет
+          Пән қосу
         </Button>
       </div>
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle>Список предметов</CardTitle>
-          <CardDescription>
-            Всего предметов: {subjects.length}
-          </CardDescription>
+          <CardTitle>Пәндер тізімі</CardTitle>
+          <CardDescription>Барлық пәндер саны: {subjects.length}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center mb-4">
@@ -183,7 +181,7 @@ export function SubjectsView() {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Поиск по предметам..."
+                placeholder="Пәндер бойынша іздеу..."
                 className="pl-8"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -194,7 +192,7 @@ export function SubjectsView() {
           <EntityTable
             columns={columns}
             data={filteredSubjects}
-            title="Учебные дисциплины"
+            title="Оқу пәндері"
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
@@ -225,8 +223,8 @@ export function SubjectsView() {
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={confirmDelete}
-        title="Удаление предмета"
-        description={currentSubject ? `Вы действительно хотите удалить предмет ${currentSubject.name}? Это действие невозможно отменить.` : "Подтвердите удаление предмета"}
+        title="Пәнді жою"
+        description={currentSubject ? `Сіз шынымен ${currentSubject.name} пәнін жойғыңыз келе ме? Бұл әрекетті қайтару мүмкін емес.` : "Пәнді жоюды растаңыз"}
       />
     </div>
   );

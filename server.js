@@ -1,3 +1,9 @@
+/*
+  server.js — основной backend-файл приложения.
+  Реализует API для всех сущностей (преподаватели, группы, аудитории, предметы, расписание),
+  отдаёт статику, обеспечивает работу WebSocket для мгновенного обновления данных.
+  Все данные хранятся в JSON-файлах в папке data/.
+*/
 import fs from "fs";
 import express from "express";
 import path from "path";
@@ -269,9 +275,9 @@ app.delete("/api/schedule/:id", (req, res) => {
   res.json({ success: true });
 });
 
-// Пример API endpoint
+// Мысал API endpoint
 app.get("/api/data", (req, res) => {
-  res.json({ message: "Привет с бэка!" });
+  res.json({ message: "Бэктен сәлем!" });
 });
 
 // Для всех остальных роутов — index.html (SPA)

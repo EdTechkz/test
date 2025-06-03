@@ -1,4 +1,3 @@
-
 import {
   Table,
   TableBody,
@@ -37,7 +36,7 @@ export function EntityTable({ columns, data, title, onEdit, onDelete }: EntityTa
               {columns.map((column) => (
                 <TableHead key={column.accessor}>{column.header}</TableHead>
               ))}
-              <TableHead className="w-[100px]">Действия</TableHead>
+              <TableHead className="w-[100px]">Әрекеттер</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -47,7 +46,7 @@ export function EntityTable({ columns, data, title, onEdit, onDelete }: EntityTa
                   colSpan={columns.length + 1}
                   className="h-24 text-center"
                 >
-                  Нет данных
+                  Деректер жоқ
                 </TableCell>
               </TableRow>
             ) : (

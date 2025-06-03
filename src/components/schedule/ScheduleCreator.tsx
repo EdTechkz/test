@@ -114,8 +114,8 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
     // Проверка времени
     if (parseTime(data.timeEnd) <= parseTime(data.timeStart)) {
       toast({
-        title: "Ошибка времени",
-        description: "Время окончания должно быть позже времени начала!",
+        title: "Уақыт қатесі",
+        description: "Аяқталу уақыты басталу уақытынан кейін болуы керек!",
         variant: "destructive",
       });
       return;
@@ -132,8 +132,8 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
     );
     if (conflict) {
       toast({
-        title: "Аудитория занята",
-        description: "В выбранное время аудитория уже используется. Выберите другое время или аудиторию.",
+        title: "Аудитория бос емес",
+        description: "Таңдалған уақытта аудитория бос емес. Басқа уақытты немесе аудиторияны таңдаңыз.",
         variant: "destructive",
       });
       return;
@@ -148,21 +148,21 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
       });
       if (!res.ok) {
         toast({
-          title: "Ошибка",
-          description: "Не удалось создать занятие. Попробуйте ещё раз.",
+          title: "Қате",
+          description: "Сабақты құру мүмкін болмады. Қайталап көріңіз.",
           variant: "destructive",
         });
         return;
       }
       toast({
-        title: "Расписание создано",
-        description: `Занятие по предмету "${data.subject}" успешно добавлено в расписание`,
+        title: "Кесте құрылды",
+        description: `"${data.subject}" сабағы кестеге сәтті қосылды`,
       });
       handleClose();
     } catch (e) {
       toast({
-        title: "Ошибка",
-        description: "Ошибка при сохранении занятия: " + (e?.message || e),
+        title: "Қате",
+        description: "Сабақты сақтау кезінде қате: " + (e?.message || e),
         variant: "destructive",
       });
     }
@@ -172,13 +172,13 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Создать расписание</DialogTitle>
+          <DialogTitle>Кесте құру</DialogTitle>
           <DialogDescription>
-            Заполните форму для создания нового занятия в расписании
+            Жаңа сабақты кестеге қосу үшін форманы толтырыңыз
           </DialogDescription>
         </DialogHeader>
         {loading ? (
-          <div className="text-center py-8">Загрузка...</div>
+          <div className="text-center py-8">Жүктелуде...</div>
         ) : error ? (
           <div className="text-center text-red-500 py-8">{error}</div>
         ) : (
@@ -189,11 +189,11 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
               name="group"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Группа</FormLabel>
+                  <FormLabel>Топ</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Выберите группу" />
+                        <SelectValue placeholder="Топты таңдаңыз" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -212,11 +212,11 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
               name="subject"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Предмет</FormLabel>
+                  <FormLabel>Пән</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Выберите предмет" />
+                        <SelectValue placeholder="Пәнді таңдаңыз" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -235,11 +235,11 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
               name="teacher"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Преподаватель</FormLabel>
+                  <FormLabel>Оқытушы</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Выберите преподавателя" />
+                        <SelectValue placeholder="Оқытушыны таңдаңыз" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -262,7 +262,7 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Выберите аудиторию" />
+                        <SelectValue placeholder="Аудиторияны таңдаңыз" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -355,10 +355,10 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={handleClose}>
-                Отмена
+                Бас тарту
               </Button>
               <Button type="submit">
-                Создать
+                Құру
               </Button>
             </DialogFooter>
           </form>

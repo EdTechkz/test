@@ -1,3 +1,8 @@
+/*
+  DashboardView.tsx — компонент главной панели управления (дашборд).
+  Отвечает за отображение сводной информации, фильтров, экспорта, а также превью расписания и уведомлений.
+  Используется как стартовая страница для пользователя.
+*/
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SchedulePreview } from "@/components/schedule/SchedulePreview";
@@ -63,10 +68,10 @@ export function DashboardView() {
 
   // Категории фильтра
   const FILTER_CATEGORIES = [
-    { value: "group", label: "Группы" },
-    { value: "teacher", label: "Преподаватели" },
-    { value: "room", label: "Аудитории" },
-    { value: "subject", label: "Предметы" },
+    { value: "group", label: "Топтар" },
+    { value: "teacher", label: "Оқытушылар" },
+    { value: "room", label: "Аудиториялар" },
+    { value: "subject", label: "Пәндер" },
   ];
 
   // Определяем значения для второго фильтра
@@ -91,7 +96,7 @@ export function DashboardView() {
       .then(data => setScheduleData(Array.isArray(data) ? data : []));
   }, []);
 
-  const currentDate = new Date().toLocaleDateString('ru-RU', {
+  const currentDate = new Date().toLocaleDateString('kk-KZ', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -103,7 +108,7 @@ export function DashboardView() {
       if (!filterType || !filterValue) return true;
       return lesson[filterType] === filterValue;
     });
-    const header = ["Группа","Предмет","Преподаватель","Аудитория","День","Начало","Окончание"];
+    const header = ["Топ","Пән","Оқытушы","Аудитория","Күн","Басталуы","Аяқталуы"];
     const rows = filtered.map(l => [l.group, l.subject, l.teacher, l.room, l.dayOfWeek, l.timeStart, l.timeEnd]);
     const csv = [header, ...rows].map(r => r.join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -115,11 +120,11 @@ export function DashboardView() {
       if (!filterType || !filterValue) return true;
       return lesson[filterType] === filterValue;
     });
-    const header = ["Группа","Предмет","Преподаватель","Аудитория","День","Начало","Окончание"];
+    const header = ["Топ","Пән","Оқытушы","Аудитория","Күн","Басталуы","Аяқталуы"];
     const rows = filtered.map(l => [l.group, l.subject, l.teacher, l.room, l.dayOfWeek, l.timeStart, l.timeEnd]);
     const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Расписание");
+    XLSX.utils.book_append_sheet(wb, ws, "Кесте");
     XLSX.writeFile(wb, "schedule.xlsx");
   }
 
@@ -127,12 +132,13 @@ export function DashboardView() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Расписание занятий</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Басты бет</h1>
+          <p className="text-muted-foreground mb-4">Колледжтің кестесін басқару жүйесіне қош келдіңіз!</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto items-center">
           <Select value={filterType} onValueChange={setFilterType}>
             <SelectTrigger>
-              <SelectValue placeholder="Вид расписания" />
+              <SelectValue placeholder="Кесте түрі" />
             </SelectTrigger>
             <SelectContent>
               {FILTER_CATEGORIES.map(cat => (
@@ -143,10 +149,10 @@ export function DashboardView() {
           <Select value={filterValue} onValueChange={setFilterValue}>
             <SelectTrigger>
               <SelectValue placeholder={
-                filterType === "group" ? "Выбрать группу" :
-                filterType === "teacher" ? "Выбрать преподавателя" :
-                filterType === "room" ? "Выбрать аудиторию" :
-                filterType === "subject" ? "Выбрать предмет" : "Выбрать"
+                filterType === "group" ? "Топты таңдау" :
+                filterType === "teacher" ? "Оқытушыны таңдау" :
+                filterType === "room" ? "Аудиторияны таңдау" :
+                filterType === "subject" ? "Пәнді таңдау" : "Таңдау"
               } />
             </SelectTrigger>
             <SelectContent>
@@ -157,7 +163,7 @@ export function DashboardView() {
           </Select>
           <Button variant="outline" className="flex-1 sm:flex-initial" onClick={() => window.print()}>
             <Printer size={16} className="mr-2" />
-            Печать
+            Басып шығару
           </Button>
           <div className="relative">
             <Button className="flex-1 sm:flex-initial" onClick={() => setExportMenuOpen(v => !v)}>
@@ -178,11 +184,35 @@ export function DashboardView() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="w-5 h-5" />
-            Расписание на неделю
+            Апталық кесте
           </CardTitle>
           <CardDescription>
-            Актуальное расписание занятий для всех групп
+            Барлық топтарға арналған өзекті сабақ кестесі
           </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="border rounded-md overflow-hidden">
+            <SchedulePreview filterType={filterType} filterValue={filterValue} />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Жақын арадағы сабақтар</CardTitle>
+          <CardDescription>Келесі сабақтар тізімі</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="border rounded-md overflow-hidden">
+            <SchedulePreview filterType={filterType} filterValue={filterValue} />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Хабарламалар</CardTitle>
+          <CardDescription>Соңғы жаңалықтар мен өзгерістер</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="border rounded-md overflow-hidden">
