@@ -51,6 +51,8 @@ export function EntityTable({ columns, data, title, onEdit, onDelete }: EntityTa
               </TableRow>
             ) : (
               data.map((row) => (
+                // DEBUG: log row
+                console.log('[EntityTable] row:', row),
                 <TableRow key={row.id}>
                   {columns.map((column) => (
                     <TableCell key={`${row.id}-${column.accessor}`}>

@@ -21,7 +21,7 @@ function toCamel(obj) {
     id: obj.id,
     name: obj.name,
     specialization: obj.specialization,
-    numberOfStudents: obj.number_of_students ?? 0,
+    numberOfStudents: Number(obj.number_of_students ?? obj.numberOfStudents) || 0,
     curator: obj.curator,
   };
 }
@@ -49,7 +49,11 @@ export function GroupsView() {
     const fetchGroups = () => {
       fetch("/api/groups/")
         .then((res) => res.json())
-        .then((data) => setGroups(data.map(toCamel)))
+        .then((data) => {
+          const camelGroups = data.map(toCamel);
+          setGroups(camelGroups);
+          console.log("[GroupsView] groups after fetch:", camelGroups);
+        })
         .catch(() => toast.error("Топтарды жүктеу қатесі"));
     };
     fetchGroups();
@@ -58,6 +62,9 @@ export function GroupsView() {
       const msg = JSON.parse(event.data);
       if (msg.type === "update" && msg.entity === "groups") {
         fetchGroups();
+        setTimeout(() => {
+          console.log("[GroupsView] groups after WS update:", groups);
+        }, 500);
       }
     };
     return () => ws.close();
@@ -93,7 +100,7 @@ export function GroupsView() {
         return;
       }
       const newGroup = await res.json();
-      setGroups((prev) => [...prev, newGroup]);
+      setGroups((prev) => [...prev, toCamel(newGroup)]);
       toast.success(`"${data.name}" тобы қосылды`);
     } catch (e) {
       toast.error("Топты қосу қатесі: " + (e?.message || e));
@@ -123,7 +130,7 @@ export function GroupsView() {
         return;
       }
       const newGroup = await res.json();
-      setGroups((prev) => prev.map((g) => (g.id === newGroup.id ? newGroup : g)));
+      setGroups((prev) => prev.map((g) => (g.id === newGroup.id ? toCamel(newGroup) : g)));
       toast.success(`"${newGroup.name}" тобы жаңартылды`);
     } catch (e) {
       toast.error("Топты жаңарту қатесі: " + (e?.message || e));

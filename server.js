@@ -75,7 +75,7 @@ function groupToCamel(g) {
     id: g.id,
     name: g.name,
     specialization: g.specialization,
-    numberOfStudents: g.number_of_students,
+    numberOfStudents: Number(g.number_of_students) || 0,
     curator: g.curator,
   };
 }
@@ -92,7 +92,7 @@ function subjectToCamel(s) {
   return {
     id: s.id,
     name: s.name,
-    hoursPerWeek: s.hours_per_week,
+    hoursPerWeek: Number(s.hours_per_week) || 0,
     type: s.type,
     department: s.department,
   };

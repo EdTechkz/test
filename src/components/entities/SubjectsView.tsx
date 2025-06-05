@@ -20,7 +20,7 @@ function toCamel(obj) {
   return {
     id: obj.id,
     name: obj.name,
-    hoursPerWeek: obj.hours_per_week ?? 0,
+    hoursPerWeek: Number(obj.hours_per_week ?? obj.hoursPerWeek) || 0,
     type: obj.type,
     department: obj.department,
   };
@@ -49,7 +49,11 @@ export function SubjectsView() {
     const fetchSubjects = () => {
       fetch("/api/subjects/")
         .then((res) => res.json())
-        .then((data) => setSubjects(data.map(toCamel)))
+        .then((data) => {
+          const camelSubjects = data.map(toCamel);
+          setSubjects(camelSubjects);
+          console.log("[SubjectsView] subjects after fetch:", camelSubjects);
+        })
         .catch(() => toast.error("Пәндерді жүктеу қатесі"));
     };
     fetchSubjects();
@@ -58,6 +62,9 @@ export function SubjectsView() {
       const msg = JSON.parse(event.data);
       if (msg.type === "update" && msg.entity === "subjects") {
         fetchSubjects();
+        setTimeout(() => {
+          console.log("[SubjectsView] subjects after WS update:", subjects);
+        }, 500);
       }
     };
     return () => ws.close();
@@ -93,7 +100,7 @@ export function SubjectsView() {
         return;
       }
       const newSubject = await res.json();
-      setSubjects((prev) => [...prev, newSubject]);
+      setSubjects((prev) => [...prev, toCamel(newSubject)]);
       toast.success(`"${data.name}" пәні қосылды`);
     } catch (e) {
       toast.error("Пәнді қосу қатесі: " + (e?.message || e));
@@ -123,7 +130,7 @@ export function SubjectsView() {
         return;
       }
       const newSubject = await res.json();
-      setSubjects((prev) => prev.map((s) => (s.id === newSubject.id ? newSubject : s)));
+      setSubjects((prev) => prev.map((s) => (s.id === newSubject.id ? toCamel(newSubject) : s)));
       toast.success(`"${newSubject.name}" пәні жаңартылды`);
     } catch (e) {
       toast.error("Пәнді жаңарту қатесі: " + (e?.message || e));
