@@ -20,29 +20,31 @@ import {
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 
+// StudentNotice — компонент для отображения уведомления для студентов
 function StudentNotice() {
   const [notice, setNotice] = useState<string | null>(null);
   useEffect(() => {
+    // Функция для загрузки уведомления с backend
     const fetchNotice = () => {
       fetch("/api/notice")
         .then(r => r.ok ? r.json() : { notice: null })
         .then(data => setNotice(data.notice || null))
         .catch(() => setNotice(null));
     };
-    fetchNotice();
+    fetchNotice(); // Загружаем при старте
     let ws: WebSocket | null = null;
     try {
-      ws = new window.WebSocket(`ws://${window.location.host}`);
+      ws = new window.WebSocket(`ws://${window.location.host}`); // Подключаемся к WebSocket
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
           if (msg.type === "update" && msg.entity === "notice") {
-            fetchNotice();
+            fetchNotice(); // Обновляем уведомление при изменениях
           }
         } catch {}
       };
     } catch {}
-    return () => { if (ws) ws.close(); };
+    return () => { if (ws) ws.close(); }; // Отключаем WebSocket при размонтировании
   }, []);
   return (
     <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-2 flex items-center gap-2">
@@ -52,12 +54,14 @@ function StudentNotice() {
   );
 }
 
+// DashboardView — основной компонент главной панели (дашборда)
 export function DashboardView() {
+  // Состояния для статистики, расписания, фильтров и т.д.
   const [stats, setStats] = useState([]);
   const [schedule, setSchedule] = useState([]);
   const [upcomingLessons, setUpcomingLessons] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [filterType, setFilterType] = useState("group");
+  const [filterType, setFilterType] = useState<string>("group");
   const [filterValue, setFilterValue] = useState("");
   const [groups, setGroups] = useState([]);
   const [teachers, setTeachers] = useState([]);
@@ -81,7 +85,7 @@ export function DashboardView() {
         setSubjects(subjects);
       });
     };
-    fetchAll();
+    fetchAll(); // Загружаем при старте
     // WebSocket для автообновления
     let ws = null;
     try {
@@ -136,6 +140,7 @@ export function DashboardView() {
     day: 'numeric'
   });
 
+  // Экспорт расписания в CSV с учетом фильтра
   function exportScheduleToCSV(schedule, filterType, filterValue) {
     const filtered = schedule.filter(lesson => {
       if (!filterType || filterType === "all" || !filterValue) return true;
@@ -148,6 +153,7 @@ export function DashboardView() {
     saveAs(blob, "schedule.csv");
   }
 
+  // Экспорт расписания в Excel с учетом фильтра
   function exportScheduleToExcel(schedule, filterType, filterValue) {
     const filtered = schedule.filter(lesson => {
       if (!filterType || filterType === "all" || !filterValue) return true;
@@ -227,7 +233,14 @@ export function DashboardView() {
         </CardHeader>
         <CardContent>
           <div className="border rounded-md overflow-hidden">
-            <SchedulePreview filterType={filterType === "all" ? undefined : filterType} filterValue={filterValue} />
+            <SchedulePreview
+              filterType={
+                filterType === "group" || filterType === "teacher" || filterType === "room"
+                  ? (filterType as "group" | "teacher" | "room")
+                  : undefined
+              }
+              filterValue={filterValue}
+            />
           </div>
         </CardContent>
       </Card>

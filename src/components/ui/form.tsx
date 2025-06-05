@@ -1,3 +1,5 @@
+// form.tsx — универсальные компоненты для работы с формами. Используются для создания, валидации и отображения форм в приложении.
+// Логика: провайдер формы, поля, подписи, описания, сообщения об ошибках. Обеспечивает удобную работу с react-hook-form.
 import * as React from "react"
 import * as LabelPrimitive from "@radix-ui/react-label"
 import { Slot } from "@radix-ui/react-slot"
@@ -13,8 +15,10 @@ import {
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 
+// Form — провайдер для всей формы (обеспечивает контекст)
 const Form = FormProvider
 
+// Контекст для поля формы (имя поля)
 type FormFieldContextValue<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
@@ -26,6 +30,7 @@ const FormFieldContext = React.createContext<FormFieldContextValue>(
   {} as FormFieldContextValue
 )
 
+// FormField — компонент для одного поля формы с валидацией
 const FormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
@@ -39,6 +44,7 @@ const FormField = <
   )
 }
 
+// Хук для получения состояния поля формы
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext)
   const itemContext = React.useContext(FormItemContext)
@@ -62,6 +68,7 @@ const useFormField = () => {
   }
 }
 
+// Контекст для одного элемента формы (нужно для связки label, описания и ошибки)
 type FormItemContextValue = {
   id: string
 }
@@ -70,6 +77,7 @@ const FormItemContext = React.createContext<FormItemContextValue>(
   {} as FormItemContextValue
 )
 
+// FormItem — контейнер для одного поля формы
 const FormItem = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -84,6 +92,7 @@ const FormItem = React.forwardRef<
 })
 FormItem.displayName = "FormItem"
 
+// FormLabel — подпись к полю формы
 const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
@@ -101,6 +110,7 @@ const FormLabel = React.forwardRef<
 })
 FormLabel.displayName = "FormLabel"
 
+// FormControl — обертка для поля ввода (например, input)
 const FormControl = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -111,6 +121,7 @@ const FormControl = React.forwardRef<
 });
 FormControl.displayName = "FormControl"
 
+// FormDescription — описание под полем формы
 const FormDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
@@ -128,6 +139,7 @@ const FormDescription = React.forwardRef<
 })
 FormDescription.displayName = "FormDescription"
 
+// FormMessage — сообщение об ошибке под полем формы
 const FormMessage = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>

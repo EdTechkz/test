@@ -62,7 +62,9 @@ function exportScheduleToExcel(schedule) {
   XLSX.writeFile(wb, "schedule.xlsx");
 }
 
+// ScheduleChat — компонент чата с ИИ-ботом для расписания
 function ScheduleChat() {
+  // Состояния для сообщений, ввода, быстрых команд и т.д.
   const [messages, setMessages] = useState(() => {
     const saved = localStorage.getItem("scheduleChatHistory");
     return saved ? JSON.parse(saved) : [
@@ -74,7 +76,7 @@ function ScheduleChat() {
   // Для отображения кнопок после последнего сообщения бота
   const [showBotActions, setShowBotActions] = useState(false);
 
-  // Быстрые команды
+  // Быстрые команды для чата
   const quickCommands = [
     { label: "Кестені тексеру", cmd: "Кестені тексеру", tip: "Жарамсыз жазбаларды көрсету" },
     { label: "Дубликаттарды тексеру", cmd: "Дубликаттарды тексеру", tip: "Қайталанатын сабақтарды көрсету" },
@@ -89,6 +91,7 @@ function ScheduleChat() {
     localStorage.setItem("scheduleChatHistory", JSON.stringify(messages));
   }, [messages]);
 
+  // Отправка сообщения в чат-бота
   const sendMessage = async (msg) => {
     const text = typeof msg === "string" ? msg : input;
     if (!text.trim()) return;
@@ -191,21 +194,17 @@ function ScheduleChat() {
 
 // ScheduleView — основной компонент для просмотра и фильтрации расписания
 export function ScheduleView() {
-  // showScheduleCreator — флаг для отображения модального окна создания расписания
-  const [showScheduleCreator, setShowScheduleCreator] = useState(false);
-  // Списки всех сущностей для фильтрации
-  const [groups, setGroups] = useState([]);
-  const [teachers, setTeachers] = useState([]);
-  const [rooms, setRooms] = useState([]);
-  const [subjects, setSubjects] = useState([]);
-  // scheduleData — все записи расписания
-  const [scheduleData, setScheduleData] = useState([]);
-  // exportMenuOpen — флаг для отображения меню экспорта
-  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  // Состояния для отображения модального окна создания расписания и списков сущностей
+  const [showScheduleCreator, setShowScheduleCreator] = useState(false); // Показывать ли окно создания
+  const [groups, setGroups] = useState([]); // Все группы
+  const [teachers, setTeachers] = useState([]); // Все преподаватели
+  const [rooms, setRooms] = useState([]); // Все аудитории
+  const [subjects, setSubjects] = useState([]); // Все предметы
+  const [scheduleData, setScheduleData] = useState([]); // Все записи расписания
+  const [exportMenuOpen, setExportMenuOpen] = useState(false); // Открыто ли меню экспорта
 
-  // useEffect: загрузка всех сущностей для фильтрации (группы, преподаватели, аудитории, предметы)
+  // Загрузка всех сущностей для фильтрации (группы, преподаватели, аудитории, предметы)
   useEffect(() => {
-    // Функция для параллельной загрузки всех данных
     const fetchAll = () => {
       Promise.all([
         fetch("/api/groups/").then(r => r.ok ? r.json() : []),
@@ -238,7 +237,7 @@ export function ScheduleView() {
     return () => { if (ws) ws.close(); };
   }, []);
 
-  // useEffect: загрузка расписания с backend
+  // Загрузка расписания с backend
   useEffect(() => {
     fetch("/api/schedule/")
       .then(res => res.json())

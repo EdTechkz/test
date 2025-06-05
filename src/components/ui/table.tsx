@@ -1,7 +1,10 @@
+// table.tsx — универсальные компоненты для отображения таблиц. Используются для вывода списков, данных, расписаний в виде таблицы.
+// Логика: обертки для таблицы, строк, ячеек, заголовков, подвала и подписи. Обеспечивает единый стиль и удобство разметки.
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+// Table — основной контейнер для таблицы (обертка с прокруткой)
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
@@ -16,6 +19,7 @@ const Table = React.forwardRef<
 ))
 Table.displayName = "Table"
 
+// TableHeader — контейнер для заголовков таблицы
 const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
@@ -24,6 +28,7 @@ const TableHeader = React.forwardRef<
 ))
 TableHeader.displayName = "TableHeader"
 
+// TableBody — контейнер для строк таблицы
 const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
@@ -36,6 +41,7 @@ const TableBody = React.forwardRef<
 ))
 TableBody.displayName = "TableBody"
 
+// TableFooter — контейнер для итоговой строки (например, сумма)
 const TableFooter = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
@@ -51,6 +57,7 @@ const TableFooter = React.forwardRef<
 ))
 TableFooter.displayName = "TableFooter"
 
+// TableRow — строка таблицы
 const TableRow = React.forwardRef<
   HTMLTableRowElement,
   React.HTMLAttributes<HTMLTableRowElement>
@@ -66,6 +73,7 @@ const TableRow = React.forwardRef<
 ))
 TableRow.displayName = "TableRow"
 
+// TableHead — ячейка заголовка таблицы
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement>
@@ -81,6 +89,7 @@ const TableHead = React.forwardRef<
 ))
 TableHead.displayName = "TableHead"
 
+// TableCell — обычная ячейка таблицы
 const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
@@ -93,13 +102,14 @@ const TableCell = React.forwardRef<
 ))
 TableCell.displayName = "TableCell"
 
+// TableCaption — подпись к таблице (например, пояснение)
 const TableCaption = React.forwardRef<
   HTMLTableCaptionElement,
   React.HTMLAttributes<HTMLTableCaptionElement>
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn("mt-4 text-sm text-muted-foreground", className)}
+    className={cn("mt-4 текст-sm text-muted-foreground", className)}
     {...props}
   />
 ))

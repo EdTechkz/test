@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Trash2 } from "lucide-react";
 
+// Интерфейс одного занятия в расписании
 interface ScheduleLesson {
   id: number;
   group: string;
@@ -13,12 +14,14 @@ interface ScheduleLesson {
   type?: string;     // для цвета (math, science...)
 }
 
+// Пропсы для компонента превью расписания
 interface SchedulePreviewProps {
   filterType?: "group" | "teacher" | "room";
   filterValue?: string;
   allowDelete?: boolean;
 }
 
+// days — массив дней недели для отображения в расписании
 const days = [
   { value: "monday", label: "Дүйсенбі" },
   { value: "tuesday", label: "Сейсенбі" },
@@ -27,15 +30,19 @@ const days = [
   { value: "friday", label: "Жұма" },
   { value: "saturday", label: "Сенбі" },
 ];
+// times — массив временных слотов для расписания
 const times = [
   "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"
 ];
 
+// SchedulePreview — компонент для отображения сетки расписания
 export function SchedulePreview({ filterType, filterValue, allowDelete }: SchedulePreviewProps) {
+  // Состояния для расписания, загрузки и ошибок
   const [schedule, setSchedule] = useState<ScheduleLesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Функция для загрузки расписания с backend
   const fetchSchedule = useCallback(() => {
     setLoading(true);
     fetch("/api/schedule/")
@@ -50,24 +57,25 @@ export function SchedulePreview({ filterType, filterValue, allowDelete }: Schedu
       });
   }, []);
 
+  // Загрузка расписания при монтировании и при обновлениях через WebSocket
   useEffect(() => {
-    fetchSchedule();
+    fetchSchedule(); // Загружаем при старте
     let ws: WebSocket | null = null;
     try {
-      ws = new window.WebSocket(`ws://${window.location.host}`);
+      ws = new window.WebSocket(`ws://${window.location.host}`); // Подключаемся к WebSocket
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
           if (msg.type === "update" && msg.entity === "schedule") {
-            fetchSchedule();
+            fetchSchedule(); // Обновляем расписание при изменениях
           }
         } catch {}
       };
     } catch {}
-    return () => { if (ws) ws.close(); };
+    return () => { if (ws) ws.close(); }; // Отключаем WebSocket при размонтировании
   }, [fetchSchedule]);
 
-  // Группируем по дням и времени
+  // Группируем расписание по дням и времени для отображения в сетке
   const grid: Record<string, Record<string, ScheduleLesson[]>> = {};
   for (const day of days) {
     grid[day.value] = {};
@@ -75,22 +83,19 @@ export function SchedulePreview({ filterType, filterValue, allowDelete }: Schedu
       grid[day.value][time] = [];
     }
   }
-  schedule.forEach(lesson => {
-    if (!filterType || !filterValue || lesson[filterType] === filterValue) {
-      // Найти индексы начала и конца
-      const startIdx = times.indexOf(lesson.timeStart);
-      const endIdx = times.indexOf(lesson.timeEnd);
-      if (grid[lesson.dayOfWeek]) {
-        for (let i = startIdx; i < endIdx; i++) {
-          const t = times[i];
-          if (grid[lesson.dayOfWeek][t]) {
-            grid[lesson.dayOfWeek][t].push(lesson);
-          }
-        }
+  for (const lesson of schedule) {
+    // Фильтрация по типу (группа, преподаватель, аудитория)
+    if (
+      (!filterType || !filterValue || lesson[filterType] === filterValue) ||
+      (filterType === undefined && filterValue === undefined)
+    ) {
+      if (grid[lesson.dayOfWeek] && grid[lesson.dayOfWeek][lesson.timeStart]) {
+        grid[lesson.dayOfWeek][lesson.timeStart].push(lesson);
       }
     }
-  });
+  }
 
+  // Удаление занятия из расписания
   const handleDelete = async (id: number) => {
     if (!window.confirm("Бұл сабақты өшіргіңіз келе ме?")) return;
     try {
@@ -161,9 +166,11 @@ export function SchedulePreview({ filterType, filterValue, allowDelete }: Schedu
         .schedule-class .teacher { color: #64748b; font-size: 10.5px; font-style: italic; margin-top: 2px; }
       `}</style>
       <div className="schedule-cell"></div>
+      {/* Заголовки дней недели */}
       {days.map((day) => (
         <div key={day.value} className="schedule-header">{day.label}</div>
       ))}
+      {/* Сетка расписания по времени и дням */}
       {times.map((time) => (
         <React.Fragment key={time}>
           <div className="schedule-time">{time}</div>

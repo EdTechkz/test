@@ -22,19 +22,25 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 
+// Описание схемы валидации формы с помощью библиотеки zod
 const formSchema = z.object({
+  // Название предмета (обязательное поле)
   name: z.string().min(1, { message: "Пән атауы міндетті" }),
+  // Количество часов в неделю (обязательное поле, число больше 0)
   hoursPerWeek: z.coerce.number().min(1, { message: "Аптасына сағат саны 0-ден көп болуы керек" }),
+  // Тип предмета (обязательное поле)
   type: z.string().min(1, { message: "Пән түрі міндетті" }),
+  // Отделение (обязательное поле)
   department: z.string().min(1, { message: "Бөлім міндетті" }),
 });
 
 type SubjectFormValues = z.infer<typeof formSchema>;
 
+// Интерфейс пропсов для диалога добавления/редактирования предмета
 interface SubjectDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSave: (data: any) => void;
+  open: boolean; // Открыт ли диалог
+  onOpenChange: (open: boolean) => void; // Функция для открытия/закрытия диалога
+  onSave: (data: any) => void; // Функция сохранения данных
   defaultValues?: {
     id?: number;
     name: string;
@@ -42,7 +48,7 @@ interface SubjectDialogProps {
     type: string;
     department: string;
   };
-  isEditing?: boolean;
+  isEditing?: boolean; // Режим редактирования
 }
 
 export function SubjectDialog({
@@ -57,37 +63,44 @@ export function SubjectDialog({
   },
   isEditing = false,
 }: SubjectDialogProps) {
+  // Инициализация формы с помощью react-hook-form и zod для валидации
   const form = useForm<SubjectFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
 
+  // Сброс формы при открытии диалога или изменении значений по умолчанию
   useEffect(() => {
     if (open && defaultValues) {
       form.reset(defaultValues);
     }
   }, [open, defaultValues, form]);
 
+  // Обработчик отправки формы
   const onSubmit = (data: SubjectFormValues) => {
     try {
+      // Передаем данные родителю и закрываем диалог
       onSave({ ...data, id: defaultValues.id });
       form.reset();
       onOpenChange(false);
     } catch (error) {
+      // В случае ошибки показываем уведомление
       console.error("Error submitting form:", error);
       toast.error("Деректерді сақтау кезінде қате пайда болды");
     }
   };
 
+  // Основной JSX диалога
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
       if (!isOpen) {
-        form.reset();
+        form.reset(); // Сброс формы при закрытии
       }
       onOpenChange(isOpen);
     }}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
+          {/* Заголовок диалога: редактирование или добавление */}
           <DialogTitle>{isEditing ? "Пәнді өңдеу" : "Пән қосу"}</DialogTitle>
           <DialogDescription>
             {isEditing
@@ -95,8 +108,10 @@ export function SubjectDialog({
               : "Жаңа пән туралы ақпаратты толтырыңыз"}
           </DialogDescription>
         </DialogHeader>
+        {/* Форма для ввода данных предмета */}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Поле: название предмета */}
             <FormField
               control={form.control}
               name="name"
@@ -108,6 +123,7 @@ export function SubjectDialog({
                 </FormItem>
               )}
             />
+            {/* Поле: количество часов в неделю */}
             <FormField
               control={form.control}
               name="hoursPerWeek"
@@ -119,6 +135,7 @@ export function SubjectDialog({
                     placeholder="6"
                     {...field}
                     onChange={(e) => {
+                      // Преобразуем строку в число
                       const value = e.target.value;
                       field.onChange(value === "" ? "" : parseInt(value, 10));
                     }}
@@ -127,6 +144,7 @@ export function SubjectDialog({
                 </FormItem>
               )}
             />
+            {/* Поле: тип предмета */}
             <FormField
               control={form.control}
               name="type"
@@ -138,6 +156,7 @@ export function SubjectDialog({
                 </FormItem>
               )}
             />
+            {/* Поле: отделение */}
             <FormField
               control={form.control}
               name="department"
@@ -149,6 +168,7 @@ export function SubjectDialog({
                 </FormItem>
               )}
             />
+            {/* Кнопки управления */}
             <DialogFooter className="pt-4">
               <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
                 Бас тарту

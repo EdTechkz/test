@@ -22,7 +22,7 @@ interface Room {
   equipment: string;
 }
 
-// Вспомогательные функции для преобразования
+// Преобразование объекта из/в camelCase (для совместимости с backend)
 function toCamel(obj) {
   if (!obj) return obj;
   return {
@@ -45,6 +45,7 @@ function toSnake(obj) {
 }
 
 export function RoomsView() {
+  // Состояния для списка аудиторий, фильтрации, поиска и диалогов
   const [rooms, setRooms] = useState<Room[]>([]);
   const [filteredRooms, setFilteredRooms] = useState<Room[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,7 +54,7 @@ export function RoomsView() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
 
-  // Загрузка аудиторий с backend + WebSocket подписка
+  // Загрузка аудиторий с сервера и подписка на обновления через WebSocket
   useEffect(() => {
     const fetchRooms = () => {
       fetch("/api/rooms/")
@@ -73,7 +74,7 @@ export function RoomsView() {
   }, []);
 
   useEffect(() => {
-    // Filter rooms on search query change
+    // Фильтрация аудиторий по поисковому запросу
     const filtered = rooms.filter((room) => {
       const query = searchQuery.toLowerCase();
       return (
@@ -90,7 +91,7 @@ export function RoomsView() {
     { header: "Аудитория нөмірі", accessor: "number" },
     { header: "Түрі", accessor: "type" },
     { header: "Сыйымдылығы", accessor: "capacity" },
-    { header: "Жабдықтар", accessor: "equipment" },
+    { header: "Оборудование", accessor: "equipment" },
   ];
 
   const handleAddRoom = async (data) => {
@@ -214,7 +215,6 @@ export function RoomsView() {
         </CardContent>
       </Card>
 
-      {/* Add Room Dialog */}
       <RoomDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
@@ -222,7 +222,6 @@ export function RoomsView() {
         defaultValues={{ number: "", type: "", capacity: 30, equipment: "" }}
       />
       
-      {/* Edit Room Dialog */}
       {currentRoom && (
         <RoomDialog
           open={isEditDialogOpen}
@@ -233,7 +232,6 @@ export function RoomsView() {
         />
       )}
       
-      {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}

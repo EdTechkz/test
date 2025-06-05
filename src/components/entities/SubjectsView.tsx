@@ -14,15 +14,15 @@ import { toast } from "sonner";
 import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog";
 import { SubjectDialog } from "./SubjectDialog";
 
-// Вспомогательные функции для преобразования
+// Преобразование объекта предмета из/в camelCase (для совместимости с backend)
 function toCamel(obj) {
   if (!obj) return obj;
   return {
     id: obj.id,
-    name: obj.name,
-    hoursPerWeek: Number(obj.hours_per_week ?? obj.hoursPerWeek) || 0,
-    type: obj.type,
-    department: obj.department,
+    name: obj.name, // Название предмета
+    hoursPerWeek: Number(obj.hours_per_week ?? obj.hoursPerWeek) || 0, // Часов в неделю
+    type: obj.type, // Тип предмета
+    department: obj.department, // Отделение
   };
 }
 function toSnake(obj) {
@@ -37,14 +37,15 @@ function toSnake(obj) {
 }
 
 export function SubjectsView() {
-  const [subjects, setSubjects] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [currentSubject, setCurrentSubject] = useState(null);
+  // Состояния для списка предметов, поиска и диалогов
+  const [subjects, setSubjects] = useState([]); // Все предметы
+  const [searchQuery, setSearchQuery] = useState(""); // Поисковый запрос
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false); // Открыт ли диалог добавления
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // Открыт ли диалог редактирования
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // Открыт ли диалог удаления
+  const [currentSubject, setCurrentSubject] = useState(null); // Текущий выбранный предмет
 
-  // Загрузка предметов с backend + WebSocket подписка
+  // Загрузка предметов с сервера и подписка на обновления через WebSocket
   useEffect(() => {
     const fetchSubjects = () => {
       fetch("/api/subjects/")
@@ -56,27 +57,29 @@ export function SubjectsView() {
         })
         .catch(() => toast.error("Пәндерді жүктеу қатесі"));
     };
-    fetchSubjects();
-    const ws = new window.WebSocket(`ws://${window.location.host}`);
+    fetchSubjects(); // Загружаем при старте
+    const ws = new window.WebSocket(`ws://${window.location.host}`); // Подключаемся к WebSocket
     ws.onmessage = (event) => {
       const msg = JSON.parse(event.data);
       if (msg.type === "update" && msg.entity === "subjects") {
-        fetchSubjects();
+        fetchSubjects(); // Обновляем список при изменениях
         setTimeout(() => {
           console.log("[SubjectsView] subjects after WS update:", subjects);
         }, 500);
       }
     };
-    return () => ws.close();
+    return () => ws.close(); // Отключаем WebSocket при размонтировании
   }, []);
 
+  // Описание столбцов таблицы предметов
   const columns = [
-    { header: "Пән атауы", accessor: "name" },
-    { header: "Аптасына сағат", accessor: "hoursPerWeek" },
-    { header: "Түрі", accessor: "type" },
-    { header: "Бөлімі", accessor: "department" },
+    { header: "Пән атауы", accessor: "name" }, // Название предмета
+    { header: "Аптасына сағат", accessor: "hoursPerWeek" }, // Часов в неделю
+    { header: "Түрі", accessor: "type" }, // Тип
+    { header: "Бөлімі", accessor: "department" }, // Отделение
   ];
 
+  // Фильтрация предметов по поисковому запросу
   const filteredSubjects = subjects.filter((subject) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -87,6 +90,7 @@ export function SubjectsView() {
     );
   });
 
+  // Добавление нового предмета
   const handleAddSubject = async (data) => {
     try {
       const res = await fetch("/api/subjects/", {
@@ -100,13 +104,14 @@ export function SubjectsView() {
         return;
       }
       const newSubject = await res.json();
-      setSubjects((prev) => [...prev, toCamel(newSubject)]);
+      setSubjects((prev) => [...prev, toCamel(newSubject)]); // Добавляем в список
       toast.success(`"${data.name}" пәні қосылды`);
     } catch (e) {
       toast.error("Пәнді қосу қатесі: " + (e?.message || e));
     }
   };
 
+  // Открытие диалога редактирования предмета
   const handleEdit = (id) => {
     const subjectToEdit = subjects.find((subject) => subject.id === id);
     if (subjectToEdit) {
@@ -117,6 +122,7 @@ export function SubjectsView() {
     }
   };
 
+  // Сохранение изменений предмета
   const handleUpdateSubject = async (updatedSubject) => {
     try {
       const res = await fetch(`/api/subjects/${updatedSubject.id}`, {
@@ -137,6 +143,7 @@ export function SubjectsView() {
     }
   };
 
+  // Открытие диалога удаления предмета
   const handleDelete = (id) => {
     const subjectToDelete = subjects.find((subject) => subject.id === id);
     if (subjectToDelete) {
@@ -147,6 +154,7 @@ export function SubjectsView() {
     }
   };
 
+  // Подтверждение удаления предмета
   const confirmDelete = async () => {
     try {
       if (currentSubject) {
@@ -162,8 +170,10 @@ export function SubjectsView() {
     }
   };
 
+  // Основной рендер компонента: заголовок, поиск, таблица, диалоги
   return (
     <div className="space-y-4">
+      {/* Заголовок и кнопка добавления */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Оқу пәндері</h1>
@@ -177,12 +187,14 @@ export function SubjectsView() {
         </Button>
       </div>
 
+      {/* Карточка с таблицей предметов */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle>Пәндер тізімі</CardTitle>
           <CardDescription>Барлық пәндер саны: {subjects.length}</CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Поиск по предметам */}
           <div className="flex items-center mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -196,6 +208,7 @@ export function SubjectsView() {
             </div>
           </div>
 
+          {/* Таблица предметов */}
           <EntityTable
             columns={columns}
             data={filteredSubjects}
@@ -206,15 +219,15 @@ export function SubjectsView() {
         </CardContent>
       </Card>
 
-      {/* Add Subject Dialog */}
+      {/* Диалог добавления предмета */}
       <SubjectDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         onSave={handleAddSubject}
         defaultValues={{ name: "", hoursPerWeek: 1, type: "", department: "" }}
       />
-
-      {/* Edit Subject Dialog */}
+      
+      {/* Диалог редактирования предмета */}
       {currentSubject && (
         <SubjectDialog
           open={isEditDialogOpen}
@@ -224,8 +237,8 @@ export function SubjectsView() {
           isEditing={true}
         />
       )}
-
-      {/* Delete Confirmation Dialog */}
+      
+      {/* Диалог подтверждения удаления */}
       <DeleteConfirmationDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}

@@ -22,19 +22,25 @@ import {
 } from "@/components/ui/form";
 import { toast } from "sonner";
 
+// Описание схемы валидации формы с помощью библиотеки zod
 const formSchema = z.object({
+  // ФИО преподавателя (обязательное поле)
   fullName: z.string().min(1, { message: "Оқытушының аты-жөні міндетті" }),
+  // Специализация (обязательное поле)
   specialization: z.string().min(1, { message: "Мамандығы міндетті" }),
+  // Стаж работы (обязательное поле)
   experience: z.string().min(1, { message: "Еңбек өтілі міндетті" }),
+  // Контактная информация (обязательное поле)
   contactInfo: z.string().min(1, { message: "Байланыс ақпараты міндетті" }),
 });
 
 type TeacherFormValues = z.infer<typeof formSchema>;
 
+// Интерфейс пропсов для диалога добавления/редактирования преподавателя
 interface TeacherDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSave: (data: any) => void;
+  open: boolean; // Открыт ли диалог
+  onOpenChange: (open: boolean) => void; // Функция для открытия/закрытия диалога
+  onSave: (data: any) => void; // Функция сохранения данных
   defaultValues?: {
     id?: number;
     fullName: string;
@@ -42,7 +48,7 @@ interface TeacherDialogProps {
     experience: string;
     contactInfo: string;
   };
-  isEditing?: boolean;
+  isEditing?: boolean; // Режим редактирования
 }
 
 export function TeacherDialog({
@@ -57,37 +63,44 @@ export function TeacherDialog({
   },
   isEditing = false,
 }: TeacherDialogProps) {
+  // Инициализация формы с помощью react-hook-form и zod для валидации
   const form = useForm<TeacherFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
 
+  // Сброс формы при открытии диалога или изменении значений по умолчанию
   useEffect(() => {
     if (open && defaultValues) {
       form.reset(defaultValues);
     }
   }, [open, defaultValues, form]);
 
+  // Обработчик отправки формы
   const onSubmit = (data: TeacherFormValues) => {
     try {
+      // Передаем данные родителю и закрываем диалог
       onSave({ ...data, id: defaultValues.id });
       form.reset();
       onOpenChange(false);
     } catch (error) {
+      // В случае ошибки показываем уведомление
       console.error("Error submitting form:", error);
       toast.error("Деректерді сақтау кезінде қате пайда болды");
     }
   };
 
+  // Основной JSX диалога
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
       if (!isOpen) {
-        form.reset();
+        form.reset(); // Сброс формы при закрытии
       }
       onOpenChange(isOpen);
     }}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
+          {/* Заголовок диалога: редактирование или добавление */}
           <DialogTitle>{isEditing ? "Оқытушыны өңдеу" : "Оқытушы қосу"}</DialogTitle>
           <DialogDescription>
             {isEditing
@@ -95,8 +108,10 @@ export function TeacherDialog({
               : "Жаңа оқытушы туралы ақпаратты толтырыңыз"}
           </DialogDescription>
         </DialogHeader>
+        {/* Форма для ввода данных преподавателя */}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Поле: ФИО преподавателя */}
             <FormField
               control={form.control}
               name="fullName"
@@ -108,6 +123,7 @@ export function TeacherDialog({
                 </FormItem>
               )}
             />
+            {/* Поле: специализация */}
             <FormField
               control={form.control}
               name="specialization"
@@ -119,6 +135,7 @@ export function TeacherDialog({
                 </FormItem>
               )}
             />
+            {/* Поле: стаж работы */}
             <FormField
               control={form.control}
               name="experience"
@@ -130,6 +147,7 @@ export function TeacherDialog({
                 </FormItem>
               )}
             />
+            {/* Поле: контактная информация */}
             <FormField
               control={form.control}
               name="contactInfo"
@@ -141,6 +159,7 @@ export function TeacherDialog({
                 </FormItem>
               )}
             />
+            {/* Кнопки управления */}
             <DialogFooter className="pt-4">
               <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
                 Бас тарту

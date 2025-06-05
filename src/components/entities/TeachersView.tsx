@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { TeacherDialog } from "./TeacherDialog";
 import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog";
 
-// Вспомогательные функции для преобразования
+// Преобразование объекта преподавателя из/в camelCase (для совместимости с backend)
 function toCamel(obj) {
   if (!obj) return {
     id: '',
@@ -25,10 +25,10 @@ function toCamel(obj) {
   };
   return {
     id: obj.id ?? '',
-    fullName: obj.full_name ?? obj.fullName ?? '',
-    specialization: obj.specialization ?? '',
-    experience: obj.experience ?? '',
-    contactInfo: obj.contact_info ?? obj.contactInfo ?? '',
+    fullName: obj.full_name ?? obj.fullName ?? '', // ФИО преподавателя
+    specialization: obj.specialization ?? '', // Специализация
+    experience: obj.experience ?? '', // Опыт работы
+    contactInfo: obj.contact_info ?? obj.contactInfo ?? '', // Контактная информация
   };
 }
 function toSnake(obj) {
@@ -43,14 +43,15 @@ function toSnake(obj) {
 }
 
 export function TeachersView() {
-  const [teachers, setTeachers] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [currentTeacher, setCurrentTeacher] = useState(null);
+  // Состояния для списка преподавателей, поиска и диалогов
+  const [teachers, setTeachers] = useState([]); // Все преподаватели
+  const [searchQuery, setSearchQuery] = useState(""); // Поисковый запрос
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false); // Открыт ли диалог добавления
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // Открыт ли диалог редактирования
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // Открыт ли диалог удаления
+  const [currentTeacher, setCurrentTeacher] = useState(null); // Текущий выбранный преподаватель
 
-  // Загрузка преподавателей с backend + WebSocket подписка
+  // Загрузка преподавателей с сервера и подписка на обновления через WebSocket
   useEffect(() => {
     const fetchTeachers = () => {
       fetch("/api/teachers/")
@@ -58,24 +59,26 @@ export function TeachersView() {
         .then((data) => setTeachers(data.map(toCamel)))
         .catch(() => toast.error("Оқытушыларды жүктеу қатесі"));
     };
-    fetchTeachers();
-    const ws = new window.WebSocket(`ws://${window.location.host}`);
+    fetchTeachers(); // Загружаем при старте
+    const ws = new window.WebSocket(`ws://${window.location.host}`); // Подключаемся к WebSocket
     ws.onmessage = (event) => {
       const msg = JSON.parse(event.data);
       if (msg.type === "update" && msg.entity === "teachers") {
-        fetchTeachers();
+        fetchTeachers(); // Обновляем список при изменениях
       }
     };
-    return () => ws.close();
+    return () => ws.close(); // Отключаем WebSocket при размонтировании
   }, []);
 
+  // Описание столбцов таблицы преподавателей
   const columns = [
-    { header: "Аты-жөні", accessor: "fullName" },
-    { header: "Мамандығы", accessor: "specialization" },
-    { header: "Еңбек өтілі", accessor: "experience" },
-    { header: "Байланыс ақпараты", accessor: "contactInfo" },
+    { header: "Аты-жөні", accessor: "fullName" }, // ФИО
+    { header: "Мамандығы", accessor: "specialization" }, // Специализация
+    { header: "Еңбек өтілі", accessor: "experience" }, // Опыт работы
+    { header: "Байланыс ақпараты", accessor: "contactInfo" }, // Контакты
   ];
 
+  // Фильтрация преподавателей по поисковому запросу
   const filteredTeachers = teachers.filter((teacher) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -86,6 +89,7 @@ export function TeachersView() {
     );
   });
 
+  // Добавление нового преподавателя
   const handleAddTeacher = async (data) => {
     try {
       const res = await fetch("/api/teachers/", {
@@ -99,13 +103,14 @@ export function TeachersView() {
         return;
       }
       const newTeacher = await res.json();
-      setTeachers((prev) => [...prev, newTeacher]);
+      setTeachers((prev) => [...prev, newTeacher]); // Добавляем в список
       toast.success(`"${data.fullName}" оқытушысы қосылды`);
     } catch (e) {
       toast.error("Оқытушыны қосу қатесі: " + (e?.message || e));
     }
   };
 
+  // Открытие диалога редактирования преподавателя
   const handleEdit = (id) => {
     const teacherToEdit = teachers.find((teacher) => teacher.id === id);
     if (teacherToEdit) {
@@ -116,6 +121,7 @@ export function TeachersView() {
     }
   };
 
+  // Сохранение изменений преподавателя
   const handleUpdateTeacher = async (updatedTeacher) => {
     try {
       const res = await fetch(`/api/teachers/${updatedTeacher.id}`, {
@@ -136,6 +142,7 @@ export function TeachersView() {
     }
   };
 
+  // Открытие диалога удаления преподавателя
   const handleDelete = (id) => {
     const teacherToDelete = teachers.find((teacher) => teacher.id === id);
     if (teacherToDelete) {
@@ -146,6 +153,7 @@ export function TeachersView() {
     }
   };
 
+  // Подтверждение удаления преподавателя
   const confirmDelete = async () => {
     try {
       if (currentTeacher) {
@@ -161,8 +169,10 @@ export function TeachersView() {
     }
   };
 
+  // Основной рендер компонента: заголовок, поиск, таблица, диалоги
   return (
     <div className="space-y-4">
+      {/* Заголовок и кнопка добавления */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Оқытушылар</h1>
@@ -176,6 +186,7 @@ export function TeachersView() {
         </Button>
       </div>
 
+      {/* Карточка с таблицей преподавателей */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle>Оқытушылар тізімі</CardTitle>
@@ -184,6 +195,7 @@ export function TeachersView() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Поиск по преподавателям */}
           <div className="flex items-center mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -197,6 +209,7 @@ export function TeachersView() {
             </div>
           </div>
 
+          {/* Таблица преподавателей */}
           <EntityTable
             columns={columns}
             data={filteredTeachers}
@@ -207,15 +220,15 @@ export function TeachersView() {
         </CardContent>
       </Card>
 
-      {/* Add Teacher Dialog */}
+      {/* Диалог добавления преподавателя */}
       <TeacherDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         onSave={handleAddTeacher}
         defaultValues={{ fullName: "", specialization: "", experience: "", contactInfo: "" }}
       />
-
-      {/* Edit Teacher Dialog */}
+      
+      {/* Диалог редактирования преподавателя */}
       {currentTeacher && (
         <TeacherDialog
           open={isEditDialogOpen}
@@ -225,8 +238,8 @@ export function TeachersView() {
           isEditing={true}
         />
       )}
-
-      {/* Delete Confirmation Dialog */}
+      
+      {/* Диалог подтверждения удаления */}
       <DeleteConfirmationDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
