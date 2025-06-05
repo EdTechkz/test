@@ -301,11 +301,11 @@ export function ScheduleCreator({ onClose }: ScheduleCreatorProps) {
               name="dayOfWeek"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>День недели</FormLabel>
+                  <FormLabel>Апта күні</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Выберите день" />
+                        <SelectValue placeholder="Күнді таңдаңыз" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
