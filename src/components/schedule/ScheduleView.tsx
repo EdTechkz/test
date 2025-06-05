@@ -140,7 +140,7 @@ function ScheduleChat() {
   return (
     <div className="border rounded-md p-4 mb-4 bg-white w-full shadow-lg">
       <div className="flex items-center justify-between mb-2">
-        <div className="font-bold text-lg flex items-center gap-2"><BotIcon size={20} className="text-blue-600" /> Чат с кесте-ботом</div>
+        <div className="font-bold text-lg flex items-center gap-2"><BotIcon size={20} className="text-blue-600" /> Чат бот</div>
         <button className="text-gray-400 hover:text-red-600 transition" title="Очистить чат" onClick={clearChat}><Trash2 size={20} /></button>
       </div>
       <div className="h-64 overflow-y-auto bg-gray-50 p-2 rounded mb-2 flex flex-col gap-2" style={{ fontSize: 15 }}>

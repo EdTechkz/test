@@ -65,3 +65,29 @@ node server.js
 - **Нет файла dist/index.html**: выполните `npm run build` перед запуском сервера
 - **Данные не обновляются**: убедитесь, что WebSocket не блокируется брандмауэром
 
+## Пример: Подключение Ollama (или другого OpenAI-совместимого API) к вашему Node.js backend
+
+// Если Node.js < 18, раскомментируйте следующую строку:
+// import fetch from "node-fetch";
+
+async function askOllama(prompt) {
+  const response = await fetch('http://localhost:11434/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'llama3', // или ваша модель
+      prompt: prompt,
+      stream: false
+    })
+  });
+  const data = await response.json();
+  return data.response || data.message || '';
+}
+
+app.post("/api/schedule-bot/message", async (req, res) => {
+  const { text } = req.body;
+  const llmReply = await askOllama(text);
+  return res.json({ reply: llmReply });
+  // Если хотите оставить fallback на старую логику, закомментируйте return и добавьте старую логику ниже.
+});
+

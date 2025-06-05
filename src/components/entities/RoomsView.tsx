@@ -90,10 +90,7 @@ export function RoomsView() {
     { header: "Аудитория нөмірі", accessor: "number" },
     { header: "Түрі", accessor: "type" },
     { header: "Сыйымдылығы", accessor: "capacity" },
-    { header: "Номер", accessor: "number" },
-    { header: "Тип", accessor: "type" },
-    { header: "Вместимость", accessor: "capacity" },
-    { header: "Оборудование", accessor: "equipment" },
+    { header: "Жабдықтар", accessor: "equipment" },
   ];
 
   const handleAddRoom = async (data) => {
